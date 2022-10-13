@@ -12,12 +12,25 @@ mod_geo_vix_ui <- function(id){
   tagList(
     fluidPage(
       fluidRow(
+
         box(status = "info", title = "Customize and Visualize",
             width = 12,
-            column(3, uiOutput(ns("select_trait"))),
-            column(3, uiOutput(ns("select_accession"))),
-            column(3, uiOutput(ns("select_checks"))),
-            column(3, uiOutput(ns("weather")))
+            maximizable = TRUE,
+            shinyWidgets::dropdown(
+              animate = shinyWidgets::animateOptions(
+                enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
+                exit = shinyWidgets::animations$fading_exits$fadeOutLeftBig
+              ),
+              style = "pill",
+              icon = icon("gear"),
+              verify_fa = FALSE,
+              status = "success",
+              width = "300px",
+              uiOutput(ns("select_trait")),
+              uiOutput(ns("select_accession")),
+              uiOutput(ns("select_checks")),
+              uiOutput(ns("weather"))
+            )
         )
       ), fluidRow(
         box(status = "info", title = "Actual Performance accross environments, 'Toggle Check Difference'",
@@ -26,17 +39,28 @@ mod_geo_vix_ui <- function(id){
         # box(width = 3, ),
         # box(width = 12, plotlyOutput(ns("check_map"))),
         box(status = "info", title = "Leaflet Animated Visualization, 'Click on Markers for more info'",
-            width = 10, withSpinner(leafletOutput(outputId = ns("live_map"), width = "100%", "900px"))),
-        box(status = "info", title = "Select Weather",
-            width = 2, radioButtons(inputId = ns("weather2"), label = "Real time view:",
-                                    c("Rain" = "rainClassic",
-                                      "Temperature" = "temperature",
-                                      "Precipitation" = "precipitationClassic",
-                                      "Clouds" = "cloudsClassic",
-                                      "Pressure" = "pressure",
-                                      "Wind" = "wind"),
-                                    selected = "precipitationClassic")
-        )
+            width = 12,
+            maximizable = TRUE,
+            shinyWidgets::dropdown(
+              animate = shinyWidgets::animateOptions(
+                enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
+                exit = shinyWidgets::animations$fading_exits$fadeOutLeftBig
+              ),
+              style = "pill",
+              icon = icon("gear"),
+              verify_fa = FALSE,
+              status = "success",
+              width = "300px",
+              radioButtons(inputId = ns("weather2"), label = "Real time view:",
+                           c("Rain" = "rainClassic",
+                             "Temperature" = "temperature",
+                             "Precipitation" = "precipitationClassic",
+                             "Clouds" = "cloudsClassic",
+                             "Pressure" = "pressure",
+                             "Wind" = "wind"),
+                           selected = "precipitationClassic")
+        ),
+        withSpinner(leafletOutput(outputId = ns("live_map"), width = "100%", "900px")))
       )
     )
   )

@@ -2,7 +2,9 @@ default:
   golem_name: Golexx
   golem_version: 0.0.0.9000
   app_prod: no
+  OPENWEATHERMAP: a6b73d4691567a29fcdf94a762540b9b
 production:
   app_prod: yes
+  OPENWEATHERMAP: a6b73d4691567a29fcdf94a762540b9b
 dev:
   golem_wd: !expr here::here()

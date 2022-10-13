@@ -120,6 +120,7 @@ render_maps <- function(dataframe, checks, trait, accessions, weather, switch){
 
 
 render_leaflet_maps <- function(dataframe, checks, trait, accessions, weather, switch){
+  Sys.setenv(R_CONFIG_ACTIVE = "production")
   lev1 <- shapedata
   traits <- toupper(trait)
   dataframe_values <- (dataframe) %>% filter(trait == traits)
@@ -135,9 +136,6 @@ render_leaflet_maps <- function(dataframe, checks, trait, accessions, weather, s
     mutate(category = if_else(accession %in% checks, "checks","selection")) %>%
     filter(accession == accessions[length(accessions)])
 
-
-  print(dataframe_values)
-  print(dataframe_difference)
 
   trait_sel <- ""
 
@@ -229,7 +227,7 @@ render_leaflet_maps <- function(dataframe, checks, trait, accessions, weather, s
                                   </tr>
                                 </table>")) %>%
       addResetMapButton() %>%
-      addOpenweatherTiles(layers = weather) %>%
+      addOpenweatherTiles(layers = weather, apikey = get_golem_config("OPENWEATHERMAP")) %>%
       addSearchFeatures(targetGroups = "location",
                         options = searchFeaturesOptions(
                           openPopup = TRUE, zoom = 12,
@@ -289,7 +287,7 @@ render_leaflet_maps <- function(dataframe, checks, trait, accessions, weather, s
                                             </tr>
                                           </table>")) %>%
       setView(lng = 9.0820, lat = 8.6753, zoom = 6) %>%
-      addOpenweatherTiles(layers = weather) %>%
+      addOpenweatherTiles(layers = weather, apikey = get_golem_config("OPENWEATHERMAP")) %>%
       addLayersControl(
         # overlayGroups = c("Rain","Temperature"),
         options = layersControlOptions(collapsed = FALSE))

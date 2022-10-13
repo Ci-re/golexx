@@ -35,7 +35,7 @@ mod_sindex_vix_ui <- function(id){
             uiOutput(ns("top_frac")),
           ),
           title = "Check Difference: Genotypes traits against Checks",
-          width = 12,
+          width = 12, maximizable = TRUE, elevation = 3,
           withSpinner(plotOutput(ns("check_diff_plot"), width = "100%", height = "2000px"))),
       )
     )

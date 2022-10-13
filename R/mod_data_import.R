@@ -56,16 +56,24 @@ mod_data_import_server <- function(id){
     userFile <- reactive({
       req(input$import_data)
       file1 <- input$import_data
-      validate(need(identical(tools::file_ext(file1$datapath), "xls"),"csv, xls or xlsx data needed"))
-      return(file1)
+      if(tools::file_ext(file1$datapath) == "xls"){
+        return(file1)
+      }else if(tools::file_ext(file1$datapath) == "csv"){
+        return(file1)
+      } else {
+        validate(need(identical(tools::file_ext(file1$datapath), "xls"),"csv, xls or xlsx data needed"))
+        return(NULL)
+      }
     })
 
     check_sindex <- reactive({
       req(userFile())
       gen_data <- userFile()$datapath
-      is_sindex <- check_si(gen_data)
-      # print(is_sindex)
-      return(is_sindex)
+      if(tools::file_ext(userFile()$datapath) == "xls"){
+        is_sindex <- check_si(gen_data)
+        return(is_sindex)
+      }
+      return("notavailable")
     })
 
     output$load_all <- renderUI({
@@ -105,7 +113,7 @@ mod_data_import_server <- function(id){
         output$sindex_select_options <- renderUI({
           prettyCheckbox(
             inputId = ns("sindex_choice"),
-            label = "Would you like to calculate Selection Index?",
+            label = "Calculate Selection Index?",
             status = "danger",
             value = FALSE,
             icon = icon("check"),
@@ -118,43 +126,6 @@ mod_data_import_server <- function(id){
         return(NULL)
       }
     })
-
-    # output$traits <- renderUI({
-    #   req(input$sindex_choice)
-    #   gen_data <- userFile()$datapath
-    #   dat <- generate_sindex_table(gen_data)
-    #   traits <- sort(colnames(dat)[-1])
-    #   selectInput(inputId = ns("traits"),label = "Select trait for selection index",choices = traits, multiple = TRUE, selected = traits)
-    # })
-    #
-    # output$weight_input <- renderUI({
-    #   req(input$traits)
-    #   print(input$sindex_choice)
-    #   if(input$sindex_choice == TRUE){
-    #     print(input$traits)
-    #     # initial value for weights and to keep track of value
-    #     # dat <- read_excel("../../git_workspace/Visualizations/BLUPS-UYT-40.xls") %>% janitor::clean_names()
-    #     gen_data <- userFile()$datapath
-    #     dat <- generate_sindex_table(gen_data)
-    #     traits <- sort(colnames(dat))
-    #     weightages <- rep(0, ncol(dat))
-    #     # set names to simplify recover/storing value
-    #     names(weightages) <- names(dat)
-    #
-    #     var_name <- input$traits
-    #     if (!is.null(var_name)) {
-    #       # lapply will return a list
-    #       lapply(1:length(var_name), function(k){
-    #
-    #         numericInput(inputId = ns(paste0("var", k)),label =
-    #                        paste('Input weight for',
-    #                              # assign stored value
-    #                              var_name[k]), weightages[[var_name[k]]]
-    #         )
-    #       })
-    #     }
-    #   }
-    # })
 
     observeEvent(input$sindex_choice, {
       gen_data <- userFile()$datapath

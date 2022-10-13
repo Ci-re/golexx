@@ -13,19 +13,24 @@ mod_env_vix_ui <- function(id){
     fluidPage(
       fluidRow(
         box(status = "info", title = "Raw Table Distribution",
+            maximizable = TRUE, elevation = 3,
             width = 6, withSpinner(DT::dataTableOutput(ns("raw_distribution_env")))),
         box(
           status = "info",
           title = "Check Difference Table",
           width = 6,
           uiOutput(ns("select_trait")),
+          maximizable = TRUE, elevation = 3,
           withSpinner(DT::dataTableOutput(ns("check_mean_distribution_env")))
         ),
         box(status = "info", title = "Multi-environment Correlation",
+            maximizable = TRUE, elevation = 3,
             width = 12, plotlyOutput(ns("correlation_env"), width = "100%", height = "500px")),
         box(status = "info", title = "Heatmaps: Genotypes by Environment",
+            maximizable = TRUE, elevation = 3,
             width = 12, uiOutput(ns("corr_heat_env")), withSpinner(plotOutput(ns("heatmaps_env"), width = "100%", height = "1200px"))),
         box(status = "info", title = "Barplot Check Difference",
+            maximizable = TRUE, elevation = 3,
             width = 12, uiOutput(ns("top_frac_env")), withSpinner(plotOutput(ns("check_diff_plot_env"), width = "100%", height = "2000px")))
       )
     )

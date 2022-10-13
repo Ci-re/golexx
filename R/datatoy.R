@@ -64,8 +64,30 @@ export_si_from_blups <- function(datapath, ...) {
 #' @examples
 #' # generate_sindex_data(datapath = "path/to/BLUPS.xls")
 #'
-generate_sindex_table <- function(datapath){
+generate_sindex_table_from_excel <- function(datapath){
   stacked_data <- get_genotype_by_location_data(datapath)
+  select_cols <- stacked_data %>% select(trait, accession, combined)
+  new_df <- data.frame(accession = c(unique(select_cols$accession)))
+  traits <- unique(select_cols$trait)
+  for(i in 1:length(traits)){
+    map_df <- select_cols %>% filter(trait == traits[i]) %>% select(accession, combined)
+    colnames(map_df)[which(names(map_df) == "combined")] <- traits[i]
+    new_df <- new_df %>% dplyr::left_join(map_df, by = "accession") %>% janitor::clean_names()
+  }
+  return(new_df)
+}
+
+#' generate_sindex_data_from_csv
+#' @param dataframe BLUPS dataframe to extract sindex sheet
+#'
+#' @return a dataframe to calculate selection index
+#' @export
+#' @examples
+#' # generate_sindex_data(datapath = "path/to/BLUPS.xls")
+#'
+generate_sindex_table_from_csv <- function(dataframe){
+  # stacked_data <- get_genotype_by_location_data(datapath)
+  stacked_data <- dataframe %>% wrangle_data()
   select_cols <- stacked_data %>% select(trait, accession, combined)
   new_df <- data.frame(accession = c(unique(select_cols$accession)))
   traits <- unique(select_cols$trait)
@@ -141,13 +163,13 @@ wrangle_colnames <- function(data, ...){
     pivot_longer(cols = -c(trait, accession, combined),names_to = "location", values_to = "values") %>%
     mutate(
       location = case_when(
-        stringr::str_detect(location, paste(c("ag", "ago"), collapse = '|')) ~ "Ago_owu",
-        stringr::str_detect(location, paste(c("ib", "iba"), collapse = '|')) ~ "Ibadan",
-        stringr::str_detect(location, paste(c("mk", "mok"), collapse = '|')) ~ "Mokwa",
-        stringr::str_detect(location, paste(c("on", "onn"), collapse = '|')) ~ "Onne",
-        stringr::str_detect(location, paste(c("ot", "oto"), collapse = '|')) ~ "Otobi",
-        stringr::str_detect(location, paste(c("ub", "ubi"), collapse = '|')) ~ "Ubiaja",
-        stringr::str_detect(location, paste(c("ik", "ike"), collapse = '|')) ~ "Ikenne",
+        stringr::str_detect(location, paste(c("ag", "ago"), collapse = '|')) ~ "ago_owu",
+        stringr::str_detect(location, paste(c("ib", "iba"), collapse = '|')) ~ "ibadan",
+        stringr::str_detect(location, paste(c("mk", "mok"), collapse = '|')) ~ "mokwa",
+        stringr::str_detect(location, paste(c("on", "onn"), collapse = '|')) ~ "onne",
+        stringr::str_detect(location, paste(c("ot", "oto"), collapse = '|')) ~ "otobi",
+        stringr::str_detect(location, paste(c("ub", "ubi"), collapse = '|')) ~ "ubiaja",
+        stringr::str_detect(location, paste(c("ik", "ike"), collapse = '|')) ~ "ikenne",
       )
     )
   piv <- piv %>% pivot_wider(names_from = "location", values_from = "values")
@@ -165,7 +187,7 @@ wrangle_colnames <- function(data, ...){
 attach_location_coordinates <- function(dataframe){
   dat <- dataframe
   piv <- dat %>% pivot_longer(cols = -c(trait, accession, combined), names_to = "location", values_to = "values")
-  locs <- data.frame(location = c("ibadan", "mokwa", "ago_owu", "onne", "otobi", "obiaja"), lat = c(7.3775, 9.2928, 7.2519, 4.7238, 7.1079, 6.6493),
+  locs <- data.frame(location = c("ibadan", "mokwa", "ago_owu", "onne", "otobi", "ubiaja"), lat = c(7.3775, 9.2928, 7.2519, 4.7238, 7.1079, 6.6493),
                      long = c(3.9470,5.0547,4.3258,7.1516,8.0897,6.3918))
   piv2 <- piv %>%
     mutate(
@@ -180,7 +202,7 @@ attach_location_coordinates <- function(dataframe){
     ) %>%
     mutate(
       lat = case_when(
-        location == "ago-owu"      ~ locs %>% filter(location=="ago-owu") %>% dplyr::select(lat) %>% as.numeric(),
+        location == "ago_owu"      ~ locs %>% filter(location=="ago_owu") %>% dplyr::select(lat) %>% as.numeric(),
         location == "ibadan"      ~ locs %>% filter(location=="ibadan") %>% dplyr::select(lat) %>% as.numeric(),
         location == "mokwa"      ~ locs %>% filter(location=="mokwa") %>% dplyr::select(lat) %>% as.numeric(),
         location == "onne"      ~ locs %>% filter(location=="onne") %>% dplyr::select(lat) %>% as.numeric(),
