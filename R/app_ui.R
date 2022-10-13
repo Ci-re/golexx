@@ -53,7 +53,8 @@ app_ui <- function(request) {
           bs4SidebarHeader("Menu"),
           bs4SidebarMenuItem(
             "Home",
-            tabName = "home", icon = shiny::icon("home", verify_fa = FALSE)
+            tabName = "home",
+            icon = shiny::icon("home", verify_fa = FALSE)
           ),
           # Import data
           bs4SidebarMenuItem(
@@ -70,6 +71,21 @@ app_ui <- function(request) {
               tabName = "summ_stat",
               icon = shiny::icon("chart-column")
             )
+          ),
+          bs4SidebarMenuItem(
+            "Selection Index",
+            tabName = "s_index",
+            icon = shiny::icon("chart-column")
+          ),
+          bs4SidebarMenuItem(
+            "Genotype by Env",
+            tabName = "env",
+            icon = shiny::icon("chart-column")
+          ),
+          bs4SidebarMenuItem(
+            "Geographical Visuals",
+            tabName = "geo",
+            icon = shiny::icon("chart-column")
           )
         )
       ),
@@ -87,6 +103,18 @@ app_ui <- function(request) {
           bs4TabItem(
             tabName = "summ_stat",
             mod_summary_stat_ui("summary_stat_1")
+          ),
+          bs4TabItem(
+            tabName = "s_index",
+            mod_sindex_vix_ui("sindex_vix_1")
+          ),
+          bs4TabItem(
+            tabName = "env",
+            mod_env_vix_ui("env_vix_1")
+          ),
+          bs4TabItem(
+            tabName = "geo",
+            mod_geo_vix_ui("geo_vix_1")
           )
         )
       )

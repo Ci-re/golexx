@@ -161,7 +161,7 @@ distribution_plot <- function(x, y, data, color, lm){
 #'
 plot_checks <- function(dataframe, traits){
   # traits <- c("DM","DYLD","FYLD","PLTHT")
-  traits <- toupper(triats)
+  traits <- toupper(traits)
   x <- dataframe %>% pivot_longer(-c(trait, accession, combined),
                                   names_to = "location", values_to = "values") %>% filter(trait %in% traits)
   # full_names <- list("DM" = "Dry Matter","DYLD" = "Dry yield", "FYLD" = "Fresh yield",
@@ -178,6 +178,5 @@ plot_checks <- function(dataframe, traits){
     # guides(fill = "none") +
     geom_text(aes(label = values), nudge_x = 0.25, nudge_y = 0.25, check_overlap = TRUE)
     # facet_wrap(~trait, scales = "free_y")
-  p <- ggplotly(p)
   return(p)
 }

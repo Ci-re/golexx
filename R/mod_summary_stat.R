@@ -26,15 +26,21 @@ mod_summary_stat_ui <- function(id){
           width = "300px",
           uiOutput(ns("select_traits")),
           uiOutput(ns("accession_range")),
-          uiOutput(ns("checks_select")),
+          # uiOutput(ns("checks_select")),
           radioButtons(inputId = ns("plot_option"), label = "Select plot",
                        choices = c("Radar", "Line"), selected = "Radar", inline = TRUE)
         ),
       ),
       uiOutput(outputId = ns("get_genotypes_info1")),
       uiOutput(outputId = ns("get_genotype_plot")),
+      br(), br(),
       fluidRow(
-        box(5,
+        box(
+          width = 12,
+          status = "info",
+          maximizable = TRUE,
+          elevation = 3,
+          title = "Plot distribution of traits",
           shinyWidgets::dropdown(
             animate = shinyWidgets::animateOptions(
               enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
@@ -54,7 +60,12 @@ mod_summary_stat_ui <- function(id){
           ),
           plotlyOutput(ns("distribution_plot"))
         ),
-        box(7,
+        box(
+          width = 12,
+          status = "info",
+          maximizable = TRUE,
+          elevation = 3,
+          title = "Plot Checks Distribution with Traits",
           shinyWidgets::dropdown(
             animate = shinyWidgets::animateOptions(
               enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
@@ -65,12 +76,9 @@ mod_summary_stat_ui <- function(id){
             verify_fa = FALSE,
             status = "success",
             width = "300px",
-            uiOutput(ns("select_accession")),
             uiOutput(ns("select_trait")),
-            # radioButtons(inputId = ns("linmod"), label = "Show lm",
-            #              choices = c("Yes", "No"), selected = "No", inline = TRUE)
           ),
-          plotlyOutput("checks_distribution")
+          plotlyOutput(ns("checks_distribution"))
         )
       )
     )
@@ -102,28 +110,28 @@ mod_summary_stat_server <- function(id, dataset){
         options = pickerOptions(
           title = "Top four traits",
           header = "Top four traits",
-          style = "success",
+          style = "btn-primary",
           maxOptions = 3,
           maxOptionsText = "Please select at most 3 traits"
         )
       )
     })
 
-    output$checks_select <- renderUI({
-      pickerInput(
-        inputId = ns("checks_select"),
-        label = "Select checks",
-        choices = c(unique(dataset$sin_data$accession)),
-        multiple = TRUE,
-        selected = get_checks(unique(dataset$sin_data$accession)),
-        options = pickerOptions(
-          liveSearch = TRUE,
-          style = "btn-primary",
-          `action-box` = TRUE,
-          size = 10
-        )
-      )
-    })
+    # output$checks_select <- renderUI({
+    #   pickerInput(
+    #     inputId = ns("checks_select"),
+    #     label = "Select checks",
+    #     choices = c(unique(dataset$sin_data$accession)),
+    #     multiple = TRUE,
+    #     selected = get_checks(unique(dataset$sin_data$accession)),
+    #     options = pickerOptions(
+    #       liveSearch = TRUE,
+    #       style = "btn-primary",
+    #       `action-box` = TRUE,
+    #       size = 10
+    #     )
+    #   )
+    # })
 
     output$accession_range <- renderUI({
       maxObs <- length(dataset$sin_data$accession)
@@ -141,7 +149,6 @@ mod_summary_stat_server <- function(id, dataset){
     output$get_genotypes_info1 <- renderUI({
       sindex_dataset <- dataset$sin_data
       env_dataset <- dataset$env_data
-      print(env_dataset)
       original_list <- unique(dataset$env_data$trait)
       selected_traits <- fix_listOfTop_Traits(original_list = original_list, top_traits = input$select_traits)
 
@@ -160,7 +167,6 @@ mod_summary_stat_server <- function(id, dataset){
           }else {
             datageh <- datageh %>% arrange(desc(combined))
           }
-          print(datageh)
           sin_d <- sindex_dataset %>% filter(accession == datageh$accession[1])
           keyvals <- list("accession" = datageh$accession[1], "value" = datageh$combined[1], index = sin_d$sindex)
           column(
@@ -213,7 +219,7 @@ mod_summary_stat_server <- function(id, dataset){
     })
 
     output$select_x <- renderUI({
-      sin_data <- dataset$sin_data
+      sin_data <- dataset$sin_data %>% select(-accession)
       pickerInput(
         inputId = ns("select_x"),
         label = "Select x",
@@ -230,7 +236,7 @@ mod_summary_stat_server <- function(id, dataset){
     })
 
     output$select_y <- renderUI({
-      sin_data <- dataset$sin_data
+      sin_data <- dataset$sin_data %>% select(-accession)
       pickerInput(
         inputId = ns("select_y"),
         label = "Select y",
@@ -246,7 +252,7 @@ mod_summary_stat_server <- function(id, dataset){
       )
     })
     output$color_xy <- renderUI({
-      sin_data <- dataset$sin_data
+      sin_data <- dataset$sin_data %>% select(-accession)
       pickerInput(
         inputId = ns("color_xy"),
         label = "Select color var",
@@ -270,7 +276,6 @@ mod_summary_stat_server <- function(id, dataset){
       y_var <- input$select_y
       col_var <- input$color_xy
       lm <- input$linmod
-      print(lm)
       output$distribution_plot <- renderPlotly({
         sin_data <- dataset$sin_data
         checks <- get_checks(accession_list = sin_data$accession)
@@ -280,7 +285,7 @@ mod_summary_stat_server <- function(id, dataset){
     })
 
     output$select_trait <- renderUI({
-      env <- dataset$env_data
+      env <- dataset$env_data %>% select(-accession)
       pickerInput(
         inputId = ns("select_trait"),
         label = "Select color var",
@@ -296,10 +301,12 @@ mod_summary_stat_server <- function(id, dataset){
       )
     })
 
-
     output$checks_distribution <- renderPlotly({
+      req(input$select_trait)
       trait <- input$select_trait
-      plot_checks(traits = trait, dataframe = dataset$env_data)
+      checks <- dataset$checks
+      dataframe <- dataset$env_data %>% filter(accession  %in% checks)
+      plot_checks(dataframe = dataframe, traits = trait)
     })
   })
 }

@@ -64,7 +64,7 @@ export_si_from_blups <- function(datapath, ...) {
 #' @examples
 #' # generate_sindex_data(datapath = "path/to/BLUPS.xls")
 #'
-generate_sindex_table <- function(datapath, ...){
+generate_sindex_table <- function(datapath){
   stacked_data <- get_genotype_by_location_data(datapath)
   select_cols <- stacked_data %>% select(trait, accession, combined)
   new_df <- data.frame(accession = c(unique(select_cols$accession)))
@@ -107,6 +107,26 @@ wrangle_data <- function(imported_data){
   return(imported_data)
 }
 
+#' wrangle_data_sindex
+#' @param imported_data rename headers of blups dataframe e.g ag_40 to Ago_owu, ib_12 = Ibadan
+#'
+#' @return a dataframe with the exact correct names of location
+#' @export
+#' @examples
+#' # generate_sindex_data(datapath = "path/to/BLUPS.xls")
+#'
+wrangle_data_sindex <- function(imported_data){
+  # print(imported_data)
+  # imported_data <- read_excel("../../git_workspace/Visualizations/BLUPS-UYT-40.xls")
+  imported_data <- imported_data %>% rename(gen = accession)
+  x <- colnames(imported_data)
+  # print(x)
+  acc_ind <- which(stringr::str_detect(x,paste(c("sindex","index","si","selection index", "s-index", "selection-index"), collapse = '|')))
+  colnames(imported_data)[acc_ind] <- "sindex"
+  imported_data <- imported_data %>% rename(accession = gen)
+  return(imported_data)
+}
+
 
 #' generate_sindex_data
 #' @param data rename headers of blups dataframe e.g ag_40 to Ago_owu, ib_12 = Ibadan
@@ -134,6 +154,42 @@ wrangle_colnames <- function(data, ...){
   return(piv)
 }
 
+
+#' attach_location_coordinates
+#' @param data rename headers of blups dataframe e.g ag_40 to Ago_owu, ib_12 = Ibadan
+#'
+#' @return a dataframe with the exact correct names of location
+#' @export
+#' @examples
+#' # generate_sindex_data(datapath = "path/to/BLUPS.xls")
+attach_location_coordinates <- function(dataframe){
+  dat <- dataframe
+  piv <- dat %>% pivot_longer(cols = -c(trait, accession, combined), names_to = "location", values_to = "values")
+  locs <- data.frame(location = c("ibadan", "mokwa", "ago_owu", "onne", "otobi", "obiaja"), lat = c(7.3775, 9.2928, 7.2519, 4.7238, 7.1079, 6.6493),
+                     long = c(3.9470,5.0547,4.3258,7.1516,8.0897,6.3918))
+  piv2 <- piv %>%
+    mutate(
+      long = case_when(
+        location == "ago_owu"      ~ locs %>% filter(location=="ago_owu") %>% dplyr::select(long) %>% as.numeric(),
+        location == "ibadan"      ~ locs %>% filter(location=="ibadan") %>% dplyr::select(long) %>% as.numeric(),
+        location == "mokwa"      ~ locs %>% filter(location=="mokwa") %>% dplyr::select(long) %>% as.numeric(),
+        location == "onne"      ~ locs %>% filter(location=="onne") %>% dplyr::select(long) %>% as.numeric(),
+        location == "otobi"      ~ locs %>% filter(location=="otobi") %>% dplyr::select(long) %>% as.numeric(),
+        location == "ubiaja"      ~ locs %>% filter(location=="ubiaja") %>% dplyr::select(long) %>% as.numeric()
+      )
+    ) %>%
+    mutate(
+      lat = case_when(
+        location == "ago-owu"      ~ locs %>% filter(location=="ago-owu") %>% dplyr::select(lat) %>% as.numeric(),
+        location == "ibadan"      ~ locs %>% filter(location=="ibadan") %>% dplyr::select(lat) %>% as.numeric(),
+        location == "mokwa"      ~ locs %>% filter(location=="mokwa") %>% dplyr::select(lat) %>% as.numeric(),
+        location == "onne"      ~ locs %>% filter(location=="onne") %>% dplyr::select(lat) %>% as.numeric(),
+        location == "otobi"      ~ locs %>% filter(location=="otobi") %>% dplyr::select(lat) %>% as.numeric(),
+        location == "ubiaja"      ~ locs %>% filter(location=="ubiaja") %>% dplyr::select(lat) %>% as.numeric()
+      )
+    )
+  return(piv2)
+}
 
 #' get_genotype_by_location_data
 #' @param datapath the exact path to your blups data

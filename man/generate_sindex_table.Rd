@@ -4,7 +4,7 @@
 \alias{generate_sindex_table}
 \title{generate_sindex_data}
 \usage{
-generate_sindex_table(datapath, ...)
+generate_sindex_table(datapath)
 }
 \arguments{
 \item{datapath}{BLUPS data path to check for sindex sheet}

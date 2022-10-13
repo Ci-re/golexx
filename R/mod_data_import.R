@@ -12,17 +12,20 @@ mod_data_import_ui <- function(id){
   tagList(
     fluidPage(
       fluidRow(
-        column(6,
+        column(8,
            box(width = 12,
-            column(6,
-             fileInput(inputId = ns("import_data"),
-               label = "Upload BLUPS data",
-               placeholder = "BLUPS DATA",
-               width = "200px",
-               accept = c("xlsx","xls"))
+            fluidRow(
+              column(6,
+                     fileInput(inputId = ns("import_data"),
+                               label = "Upload BLUPS data",
+                               placeholder = "BLUPS DATA",
+                               width = "250px",
+                               accept = c("xlsx","xls"))
+              ),
+              column(6,uiOutput(ns("select_checks")))
             )
         )),
-        column(6,
+        column(4,
                box(width = 12, textOutput(outputId = ns("user_prompt")),
                    uiOutput(outputId = ns("sindex_select_options")),
                    # uiOutput(outputId = ns("subset_table")),
@@ -226,6 +229,25 @@ mod_data_import_server <- function(id){
       removeModal()
     })
 
+    output$select_checks <- renderUI({
+      req(userFile())
+      gen_data <- userFile()$datapath
+      get_gxe_data <- get_genotype_by_location_data(gen_data)
+      pickerInput(
+        inputId = ns("select_checks"),
+        label = "Select checks",
+        choices = c(unique(get_gxe_data$accession)),
+        multiple = TRUE,
+        selected = get_checks(unique(get_gxe_data$accession)),
+        options = pickerOptions(
+          liveSearch = TRUE,
+          style = "btn-primary",
+          `action-box` = TRUE,
+          size = 10
+        )
+      )
+    })
+
     blup_sindex_data <- eventReactive(input$load_all, {
       # req(check_sindex())
       print(check_sindex())
@@ -250,7 +272,7 @@ mod_data_import_server <- function(id){
       #   }
       # )
       # # print(sindex)
-      dataframes_list <- list(env_data = get_gxe_data, sin_data = get_sindex_data)
+      dataframes_list <- list(env_data = get_gxe_data, sin_data = get_sindex_data, checks = input$select_checks)
         # print(dataframes_list)
       return(dataframes_list)
     })

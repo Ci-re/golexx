@@ -10,22 +10,28 @@ Imports:
     config (>= 0.3.1),
     dplyr,
     DT,
+    forcats,
+    ggcorrplot,
     ggiraphExtra,
     ggplot2,
     ggrepel,
     golem (>= 0.3.3),
     janitor,
+    leaflet,
     magrittr,
     plotly,
     purrr,
     readxl,
+    sf,
     shiny (>= 1.7.2),
     shinycssloaders,
     shinyWidgets,
     stringr,
+    superheat,
     tibble,
     tidyr,
-    tools
+    tools,
+    viridis
 Suggests: 
     spelling,
     testthat (>= 3.0.0)
@@ -34,3 +40,5 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 RoxygenNote: 7.2.0
+Depends: 
+    R (>= 2.10)

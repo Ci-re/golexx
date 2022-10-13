@@ -19,6 +19,10 @@
 usethis::use_package( "bs4Dash" )
 usethis::use_package( "ggrepel" )
 usethis::use_package( "plotly" )
+usethis::use_package( "forcats" )
+usethis::use_package( "ggcorrplot" )
+usethis::use_package( "superheat" )
+usethis::use_package( "viridis" )
 usethis::use_package( "ggiraphExtra" )
 usethis::use_package( "shinycssloaders" )
 usethis::use_package( "readxl" )
@@ -26,12 +30,17 @@ usethis::use_package( "shinyWidgets" )
 usethis::use_package( "DT" )
 usethis::use_package( "ggplot2" )
 usethis::use_package( "magrittr" )
+usethis::use_package( "leaflet.providers" )
+usethis::use_package( "leaflet.extras2" )
+usethis::use_package( "leaflet.extras" )
 usethis::use_package( "dplyr" )
 usethis::use_package( "tidyr" )
 usethis::use_package( "stringr" )
 usethis::use_package( "tibble" )
 usethis::use_package( "janitor" )
 usethis::use_package( "purrr" )
+usethis::use_package( "leaflet" )
+usethis::use_package( "sf" )
 attachment::att_amend_desc()
 
 ## Add modules ----
@@ -39,10 +48,20 @@ attachment::att_amend_desc()
 golem::add_module(name = "data_import", with_test = TRUE) # Name of the module
 # golem::add_module(name = "datatoy", with_test = TRUE) # Name of the module
 golem::add_module(name = "summary_stat", with_test = TRUE) # Name of the module
+golem::add_module(name = "sindex_vix", with_test = TRUE) # Name of the module
+golem::add_module(name = "env_vix", with_test = TRUE) # Name of the module
+golem::add_module(name = "geo_vix", with_test = TRUE) # Name of the module
 
 ## Add helper functions ----
 usethis::use_r("datatoy")
 usethis::use_r("summary")
+usethis::use_r("sindex")
+usethis::use_r("env")
+usethis::use_r("geo")
+usethis::use_r("shapedata")
+usethis::use_r("precdata")
+usethis::use_r("tempdata")
+
 
 
 ## Creates fct_* and utils_*
@@ -58,7 +77,7 @@ golem::add_sass_file("custom")
 
 ## Add internal datasets ----
 ## If you have data in your package
-usethis::use_data_raw(name = "my_dataset", open = FALSE)
+usethis::use_data_raw(name = "data", open = FALSE)
 
 ## Tests ----
 ## Add one line by test you want to create

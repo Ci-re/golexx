@@ -10,11 +10,18 @@
 #' @importFrom shinycssloaders withSpinner
 #' @importFrom DT datatable
 #' @importFrom magrittr %>%
-#' @importFrom plotly ggplotly
+#' @import plotly
 #' @import dplyr
+#' @import leaflet.providers
+#' @import forcats
+#' @import ggcorrplot
 #' @import tidyr
 #' @import readxl
+#' @import leaflet
+#' @import leaflet.extras
+#' @import viridis
 #' @import tibble
+#' @import superheat
 #' @import ggplot2
 #' @import ggrepel
 #' @import janitor
@@ -23,6 +30,8 @@
 #' @import stringr
 #' @import shinyWidgets
 #' @rawNamespace import(bs4Dash, except = c(progressBar, insertTab, actionButton, updateTabsetPanel, column, tabsetPanel, tabPanel))
+#' @rawNamespace import(leaflet.extras2, except = c(addSpinner, menuItem))
+# Sys.setenv("OPENWEATHERMAP" = 'a6b73d4691567a29fcdf94a762540b9b')
 run_app <- function(
   onStart = NULL,
   options = list(),
