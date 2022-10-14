@@ -14,26 +14,32 @@ mod_summary_stat_ui <- function(id){
   tagList(
     fluidPage(
       fluidRow(
-        shinyWidgets::dropdown(
-          animate = shinyWidgets::animateOptions(
-            enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
-            exit = shinyWidgets::animations$fading_exits$fadeOutLeftBig
+        box(
+          shinyWidgets::dropdown(
+            animate = shinyWidgets::animateOptions(
+              enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
+              exit = shinyWidgets::animations$fading_exits$fadeOutLeftBig
+            ),
+            style = "pill",
+            icon = icon("gear"),
+            verify_fa = FALSE,
+            status = "success",
+            width = "300px",
+            uiOutput(ns("select_traits")),
+            uiOutput(ns("accession_range")),
+            # uiOutput(ns("checks_select")),
+            radioButtons(inputId = ns("plot_option"), label = "Select plot",
+                         choices = c("Radar", "Line"), selected = "Radar", inline = TRUE)
           ),
-          style = "pill",
-          icon = icon("gear"),
-          verify_fa = FALSE,
-          status = "success",
-          width = "300px",
-          uiOutput(ns("select_traits")),
-          uiOutput(ns("accession_range")),
-          # uiOutput(ns("checks_select")),
-          radioButtons(inputId = ns("plot_option"), label = "Select plot",
-                       choices = c("Radar", "Line"), selected = "Radar", inline = TRUE)
-        ),
+        width = 12,
+        status = "info",
+        maximizable = TRUE,
+        elevation = 3,
+        title = "Summary Statistics",
+        uiOutput(outputId = ns("get_genotypes_info1")),
+        uiOutput(outputId = ns("get_genotype_plot"))
+        )
       ),
-      uiOutput(outputId = ns("get_genotypes_info1")),
-      uiOutput(outputId = ns("get_genotype_plot")),
-      br(), br(),
       fluidRow(
         box(
           width = 12,
@@ -92,7 +98,6 @@ mod_summary_stat_server <- function(id, dataset){
   # try(eval.parent(substitute(dataset)), silent = TRUE)
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-
     output$select_traits <- renderUI({
       # choices = c("Dry yield" = "dyld", "Fresh Yield" = "fyld", "Dry Matter" = "dm",
       #             "Plant Height" = "pltht", "Sprout" = "sprout", "Mosaic" = "mcmds",
@@ -117,24 +122,26 @@ mod_summary_stat_server <- function(id, dataset){
       )
     })
 
-    # output$checks_select <- renderUI({
-    #   pickerInput(
-    #     inputId = ns("checks_select"),
-    #     label = "Select checks",
-    #     choices = c(unique(dataset$sin_data$accession)),
-    #     multiple = TRUE,
-    #     selected = get_checks(unique(dataset$sin_data$accession)),
-    #     options = pickerOptions(
-    #       liveSearch = TRUE,
-    #       style = "btn-primary",
-    #       `action-box` = TRUE,
-    #       size = 10
-    #     )
-    #   )
-    # })
+    output$select_trait <- renderUI({
+      env <- dataset$env_data %>% select(-accession)
+      pickerInput(
+        inputId = ns("select_trait"),
+        label = "Select color var",
+        choices = c(unique(env$trait)),
+        multiple = FALSE,
+        selected = "",
+        options = pickerOptions(
+          liveSearch = TRUE,
+          style = "btn-primary",
+          `action-box` = TRUE,
+          size = 3
+        )
+      )
+    })
 
     output$accession_range <- renderUI({
-      maxObs <- length(dataset$sin_data$accession)
+      sin_data <- dataset$sin_data
+      maxObs <- length(sin_data$accession)
       minObs <-  1
       sliderInput(
         inputId = ns("accession_range"),
@@ -158,7 +165,6 @@ mod_summary_stat_server <- function(id, dataset){
                          "DYLD" = "Dry yield", "FYLD" = "Fresh yield")
       box_color <- c("teal", "gray-dark", "info")
       icons <- c("chart-column", "chart-pie", "chart-line")
-
       fluidRow(
         lapply(1:length(selected_traits), function(k){
           datageh <- env_dataset %>% filter(trait == toupper(selected_traits[k]))
@@ -168,14 +174,15 @@ mod_summary_stat_server <- function(id, dataset){
             datageh <- datageh %>% arrange(desc(combined))
           }
           sin_d <- sindex_dataset %>% filter(accession == datageh$accession[1])
-          keyvals <- list("accession" = datageh$accession[1], "value" = datageh$combined[1], index = sin_d$sindex)
+          # print(sin_d)
+          keyvals <- list("accession" = datageh$accession[1], "value" = datageh$combined[1], "sindex" = sin_d$sindex)
           column(
             4,
             bs4Dash::infoBox(
               elevation = 2,
               iconElevation = 3,
               title = h5(keyvals["accession"], class = "clone-name"),
-              value = paste0("value: ", keyvals["value"],";  SI: ",sin_d$index),
+              value = paste("Value: ", keyvals["value"],"   Index: ",keyvals["sindex"]),
               width = NULL,
               subtitle = full_names[toupper(selected_traits[k])],
               icon = icon(icons[k], verify_fa = FALSE),
@@ -188,11 +195,15 @@ mod_summary_stat_server <- function(id, dataset){
     })
 
     output$get_genotype_plot <- renderUI({
-      req(input$accession_range)
+      if(!is.null(input$accession_range)){
+        print(input$accession_range)
+        accession_range <- input$accession_range
+      } else {
+        accession_range <- c(1,4)
+      }
       env_dataset <- dataset$env_data
       original_list <- unique(dataset$env_data$trait)
       selected_traits <- fix_listOfTop_Traits(original_list = original_list, top_traits = input$select_traits)
-      accession_range <- input$accession_range
       checks <- input$checks_select
       plot_choice <- input$plot_option
       fluidRow(
@@ -251,8 +262,9 @@ mod_summary_stat_server <- function(id, dataset){
         )
       )
     })
+
     output$color_xy <- renderUI({
-      sin_data <- dataset$sin_data %>% select(-accession)
+      sin_data <- dataset$sin_data
       pickerInput(
         inputId = ns("color_xy"),
         label = "Select color var",
@@ -266,9 +278,6 @@ mod_summary_stat_server <- function(id, dataset){
           size = 3
         )
       )
-      # accession_list <- sin_data$accession
-      # checks <- get_checks(accession_list = accession_list)
-      # sin_data <- sin_data %>% mutate(category = if_else(accession %in% checks, "check", "genotype"))
     })
 
     observeEvent(input$load_plot1, {
@@ -282,23 +291,6 @@ mod_summary_stat_server <- function(id, dataset){
         sin_data <- sin_data %>% mutate(category = if_else(accession %in% checks, "check", "genotype"))
         distribution_plot(x = x_var, y = y_var, data = sin_data, color = col_var, lm = lm)
       })
-    })
-
-    output$select_trait <- renderUI({
-      env <- dataset$env_data %>% select(-accession)
-      pickerInput(
-        inputId = ns("select_trait"),
-        label = "Select color var",
-        choices = c(unique(env$trait)),
-        multiple = FALSE,
-        selected = "",
-        options = pickerOptions(
-          liveSearch = TRUE,
-          style = "btn-primary",
-          `action-box` = TRUE,
-          size = 3
-        )
-      )
     })
 
     output$checks_distribution <- renderPlotly({

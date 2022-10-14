@@ -4,10 +4,10 @@
 \alias{export_si_from_blups}
 \title{export_si_from_blups}
 \usage{
-export_si_from_blups(datapath, ...)
+export_si_from_blups(datapath)
 }
 \arguments{
-\item{datapath}{BLUPS data path to check for sindex sheet}
+\item{datapath}{BLUPS data path to extract sindex sheet from xls file}
 }
 \value{
 helps to extract the selection index data in BLUPS file

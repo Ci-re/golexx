@@ -10,7 +10,7 @@ get_genotype_by_location_data(datapath, ...)
 \item{datapath}{the exact path to your blups data}
 }
 \value{
-a stacked dataframe of all the traits and location in one dataframe
+a stacked dataframe of all the traits and location in one dataframe extracted from excel sheets
 }
 \description{
 get_genotype_by_location_data

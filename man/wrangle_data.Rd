@@ -2,20 +2,21 @@
 % Please edit documentation in R/datatoy.R
 \name{wrangle_data}
 \alias{wrangle_data}
-\title{generate_sindex_data}
+\title{wrangle_data}
 \usage{
 wrangle_data(imported_data)
 }
 \arguments{
-\item{data}{rename headers of blups dataframe e.g ag_40 to Ago_owu, ib_12 = Ibadan}
+\item{imported_data}{check headers that are not spelt correctly and put necessary corrections}
 }
 \value{
 a dataframe with the exact correct names of location
 }
 \description{
-generate_sindex_data
+wrangle_data
 }
 \examples{
-# generate_sindex_data(datapath = "path/to/BLUPS.xls")
+# generate_sindex_data(dataframe = "blupscsvdata/exceldata")
+# target headers are accession, combined, and trait
 
 }

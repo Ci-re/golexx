@@ -110,8 +110,8 @@ mod_env_vix_server <- function(id, dataset, checks){
         filter = 'top',
         extensions = 'Buttons',
         options = list(
-          paging= TRUE,
           searching = TRUE,
+          extend = "collection",
           scrollX = TRUE,
           dom = 'Bfrtip',
           fixedColumns = TRUE,

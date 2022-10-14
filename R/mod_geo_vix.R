@@ -138,6 +138,7 @@ mod_geo_vix_server <- function(id, dataset, checks){
       req(input$select_accession)
       req(input$select_check)
       req(input$weather)
+      print(dataset$env_data)
 
       genotype <- input$select_accession
       weather_data <- input$weather

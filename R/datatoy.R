@@ -27,13 +27,13 @@ check_si <- function(datapath = "",...){
 
 #' export_si_from_blups
 #'
-#' @param datapath BLUPS data path to check for sindex sheet
+#' @param datapath BLUPS data path to extract sindex sheet from xls file
 #'
 #' @return helps to extract the selection index data in BLUPS file
 #' @export
 #' @examples
 #' # export_si_from_blups(datapath = "path/to/BLUPS.xls")
-export_si_from_blups <- function(datapath, ...) {
+export_si_from_blups <- function(datapath) {
   # datapath <- "../../Visualizations/BLUPS-UYT-40.xls"
   mysheets_fromexcel <- list()
   mysheetlist <- excel_sheets(datapath)
@@ -51,9 +51,9 @@ export_si_from_blups <- function(datapath, ...) {
   }
   list_of_excels <- mysheets_fromexcel %>% purrr::discard(is.null)
   list_of_excels <- list_of_excels[[1]]
-  list_of_excels <- as.data.frame(list_of_excels) %>% janitor::clean_names()
+  sin_data <- as.data.frame(list_of_excels) %>% janitor::clean_names() %>% wrangle_data_sindex()
   # print(class(list_of_excels))
-  return(list_of_excels)
+  return(sin_data)
 }
 
 #' generate_sindex_data
@@ -83,7 +83,7 @@ generate_sindex_table_from_excel <- function(datapath){
 #' @return a dataframe to calculate selection index
 #' @export
 #' @examples
-#' # generate_sindex_data(datapath = "path/to/BLUPS.xls")
+#' # generate_sindex_data(dataframe = "dataframe")
 #'
 generate_sindex_table_from_csv <- function(dataframe){
   # stacked_data <- get_genotype_by_location_data(datapath)
@@ -100,32 +100,26 @@ generate_sindex_table_from_csv <- function(dataframe){
 }
 
 
-#' generate_sindex_data
-#' @param data rename headers of blups dataframe e.g ag_40 to Ago_owu, ib_12 = Ibadan
+#' wrangle_data
+#' @param imported_data check headers that are not spelt correctly and put necessary corrections
 #'
 #' @return a dataframe with the exact correct names of location
 #' @export
 #' @examples
-#' # generate_sindex_data(datapath = "path/to/BLUPS.xls")
+#' # generate_sindex_data(dataframe = "blupscsvdata/exceldata")
+#' # target headers are accession, combined, and trait
 #'
 wrangle_data <- function(imported_data){
   # print(imported_data)
   # imported_data <- read_csv("../../Visualizations/combo.csv")
   imported_data <- janitor::clean_names(imported_data)
   x <- colnames(imported_data)
-  # print(x)
   acc_ind <- which(str_detect(x,paste(c("ssion", "genotype", "gen", "acc", "landrace", "germpl", "clon", "clone"), collapse = '|')))
   colnames(imported_data)[acc_ind] <- "accession"
   comb_ind <- which(str_detect(x,paste(c("com", "combine", "avg", "average", "loc"), collapse = '|')))
   colnames(imported_data)[comb_ind] <- "combined"
   trait_ind <- which(str_detect(x,paste(c("trait", "trts", "traits"), collapse = '|')))
   colnames(imported_data)[trait_ind] <- "trait"
-  # print(colnames(imported_data))
-  # imported_data
-  # dat <- janitor::clean_names(imported_data)
-  # print(imported_data)
-  #%>% select_if(~!any(is.na(.)))
-  # print(imported_data)
   return(imported_data)
 }
 
@@ -140,11 +134,10 @@ wrangle_data <- function(imported_data){
 wrangle_data_sindex <- function(imported_data){
   # print(imported_data)
   # imported_data <- read_excel("../../git_workspace/Visualizations/BLUPS-UYT-40.xls")
-  imported_data <- imported_data %>% rename(gen = accession)
+  imported_data <- imported_data %>% wrangle_data() %>% rename(gen = accession)
   x <- colnames(imported_data)
-  # print(x)
-  acc_ind <- which(stringr::str_detect(x,paste(c("sindex","index","si","selection index", "s-index", "selection-index"), collapse = '|')))
-  colnames(imported_data)[acc_ind] <- "sindex"
+  sin_ind <- which(str_detect(x,paste(c("sindex","index","si","selection index", "s-index", "selection-index"), collapse = '|')))
+  colnames(imported_data)[sin_ind] <- "sindex"
   imported_data <- imported_data %>% rename(accession = gen)
   return(imported_data)
 }
@@ -157,7 +150,7 @@ wrangle_data_sindex <- function(imported_data){
 #' @export
 #' @examples
 #' # generate_sindex_data(datapath = "path/to/BLUPS.xls")
-wrangle_colnames <- function(data, ...){
+wrangle_colnames <- function(data){
   # print(data)
   piv <- data %>% janitor::clean_names() %>%
     pivot_longer(cols = -c(trait, accession, combined),names_to = "location", values_to = "values") %>%
@@ -216,7 +209,7 @@ attach_location_coordinates <- function(dataframe){
 #' get_genotype_by_location_data
 #' @param datapath the exact path to your blups data
 #'
-#' @return a stacked dataframe of all the traits and location in one dataframe
+#' @return a stacked dataframe of all the traits and location in one dataframe extracted from excel sheets
 #' @export
 #' @examples
 #' # get_genotype_by_location_data(datapath = "path/to/BLUPS.xls")
@@ -269,8 +262,11 @@ get_genotype_by_location_data <- function(datapath, ...){
 #'
 #'
 calculate_selection_index <- function(dataframe, ...){
+  # print(dataframe)
   # dataframe <- generate_sindex_table("../../git_workspace/Visualizations/trial.xls")
   trait_weight <- list(...)
+  dataframe <- dataframe %>% janitor::clean_names()
+  # print(dataframe)
   # trait_weight <- c(shtwt = 15, rtwt = 15, dm = 20, sprout = 10, hi = 10, rtno = 15,  mcmds = -10, mcmdi = -10, pltht = 10, fyld = 20, dyld = 20)
   colnames_dataframe <- colnames(dataframe)
   acc_ind <- which(str_detect(colnames_dataframe,paste(c("ssion", "genotype", "gen", "aces", "landrace", "germpl", "clon", "clone"), collapse = '|')))
@@ -300,7 +296,7 @@ calculate_selection_index <- function(dataframe, ...){
     SI = arr.data %*% arr.wt
     SI <- round(SI,3)
     final_data = cbind(dataframe, data.frame(SI))
-    final_data <- final_data %>% rename(si = value) %>% arrange(-si)
+    final_data <- final_data %>% rename(sindex = value) %>% arrange(-sindex) %>% wrangle_data_sindex()
     return(final_data)
   }
 }

@@ -72,7 +72,7 @@ sindex_heatmap <- function(dataframe, color_scale){
     column_to_rownames("accession")
 
   dm <- paste(u4h$dm, "dm")
-  index <- paste(u4h$index, "index")
+  index <- paste(u4h$sindex, "sindex")
 
   # set the text colors
   # identify all scaled values that fall below -0.3
@@ -224,11 +224,11 @@ sup_heat_corr <- function(dataframe, checks){
   point.col <- rep("wheat3", nrow(u4h))
   # color checks
   point.col[print_col_checks[c(1:ncol(print_col_checks)),13]] <- "red"
-  sup_heat_corr <- superheat(dplyr::select(u4h, -index),
+  sup_heat_corr <- superheat(dplyr::select(u4h, -sindex),
                              # scale the variables/columns
                              scale = T,
                              # order the rows by selection index
-                             order.rows = order(dataframe$index),
+                             order.rows = order(dataframe$sindex),
 
                              # # add selection index as a scatterplot next to the rows
                              # yr = u4h$sindex,
@@ -307,7 +307,7 @@ sup_heat_corr <- function(dataframe, checks){
                              # bottom.label.size = 0.24,
 
                              # add selection index as a scatterplot next to the rows
-                             yr = u4h$index,
+                             yr = u4h$sindex,
                              yr.axis.name = "selection index",
                              yr.plot.size = 0.2,
                              # yr.lim = c(0, 60),
@@ -315,7 +315,7 @@ sup_heat_corr <- function(dataframe, checks){
                              yr.obs.col = point.col,
                              yr.point.size = 4,
                              # add correlation between each variable and selection index
-                             yt = cor(u4h)[-12,"index"],
+                             yt = cor(u4h)[-12,"sindex"],
                              yt.plot.type = "bar",
                              yt.axis.name = "Correlation with \n selection index",
                              #yt.lim = c(-1.5, 1)

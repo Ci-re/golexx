@@ -2,13 +2,12 @@
 options(ggrepel.max.overlaps = Inf)
 #' fix_listOfTop_Traits
 #'
-#' @param original_list
-#' @param top_traits
+#' @param original_list the full list of traits
+#' @param top_traits the traits selected
 #'
 #' @return a list
-#' @export
 #' @examples
-#' # check_si(datapath = "path/to/BLUPS.xls")
+#' # fix_listOfTop_Traits(original_list = trait_list, top_traits = selected_traits)
 #'
 
 fix_listOfTop_Traits <- function(original_list, top_traits){
@@ -49,7 +48,7 @@ get_checks <- function(accession_list){
 }
 
 
-#' get_genotype_by_location_data
+#' plotRadar
 #' @param datapath the exact path to your blups data
 #'
 #' @return a stacked dataframe of all the traits and location in one dataframe

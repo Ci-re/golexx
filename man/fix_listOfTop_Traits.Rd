@@ -7,7 +7,9 @@
 fix_listOfTop_Traits(original_list, top_traits)
 }
 \arguments{
-\item{top_traits}{}
+\item{original_list}{the full list of traits}
+
+\item{top_traits}{the traits selected}
 }
 \value{
 a list
@@ -16,6 +18,6 @@ a list
 fix_listOfTop_Traits
 }
 \examples{
-# check_si(datapath = "path/to/BLUPS.xls")
+# fix_listOfTop_Traits(original_list = trait_list, top_traits = selected_traits)
 
 }

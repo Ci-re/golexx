@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.R
 \name{plotRadar}
 \alias{plotRadar}
-\title{get_genotype_by_location_data}
+\title{plotRadar}
 \usage{
 plotRadar(trait_to_plot, imported_data, checks, accession_range)
 }
@@ -13,7 +13,7 @@ plotRadar(trait_to_plot, imported_data, checks, accession_range)
 a stacked dataframe of all the traits and location in one dataframe
 }
 \description{
-get_genotype_by_location_data
+plotRadar
 }
 \examples{
 # get_genotype_by_location_data(datapath = "path/to/BLUPS.xls")

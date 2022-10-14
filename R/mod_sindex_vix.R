@@ -20,7 +20,15 @@ mod_sindex_vix_ui <- function(id){
             width = 12, withSpinner(plotlyOutput(ns("correlation"), height = "800px", width = "100%"))),
         # box(width = 3),
         box(status = "info", title = "Heatmap: Genotypes against Traits ",
-            width = 12, uiOutput(ns("heatmap_hint")), withSpinner(plotOutput(ns("heatmaps"), width = "100%", height = "1200px"))),
+            width = 12,
+            prettyCheckbox(
+              inputId = ns("corr_heat"),
+              label = "Switch plot",
+              status = "success",
+              outline = TRUE,
+              value = TRUE
+            ),
+            withSpinner(plotOutput(ns("heatmaps"), width = "100%", height = "1200px"))),
         box(
           shinyWidgets::dropdown(
             animate = shinyWidgets::animateOptions(
@@ -95,24 +103,20 @@ mod_sindex_vix_server <- function(id, dataset, checks){
       ggplotly(dat)
     })
 
+
     output$heatmap_hint <- renderUI({
-      prettyCheckbox(
-        inputId = ns("corr_heat"),
-        label = "Switch plot",
-        status = "success",
-        outline = TRUE,
-        value = TRUE
-      )
+
     })
 
     output$heatmaps <- renderPlot({
-      req(input$corr_heat)
+      # req(input$corr_heat)
       switch <- input$corr_heat
+      # print(switch)
       sindex_dataframe <- dataset$sin_data %>% dplyr::select(accession | where(is.numeric))
       if(switch == TRUE){
         dat <- sup_heat_corr(sindex_dataframe, checks)
         return(dat)
-      }else{
+      }else if(switch == FALSE) {
         dat <- sindex_heatmap(dataframe = sindex_dataframe)
         return(dat)
       }

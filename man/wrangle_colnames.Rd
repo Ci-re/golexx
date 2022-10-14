@@ -4,7 +4,7 @@
 \alias{wrangle_colnames}
 \title{generate_sindex_data}
 \usage{
-wrangle_colnames(data, ...)
+wrangle_colnames(data)
 }
 \arguments{
 \item{data}{rename headers of blups dataframe e.g ag_40 to Ago_owu, ib_12 = Ibadan}

@@ -129,7 +129,13 @@ mod_data_import_server <- function(id){
 
     observeEvent(input$sindex_choice, {
       gen_data <- userFile()$datapath
-      dat <- generate_sindex_table(gen_data)
+      ext <- tools::file_ext(userFile()$datapath)
+      if(ext == "xls" || ext == "xlsx"){
+        dat <- generate_sindex_table_from_excel(gen_data)
+      } else if(ext == "csv") {
+        gen_data <- read.csv(userFile()$datapath)
+        dat <- generate_sindex_table_from_csv(gen_data)
+      }
       trait_acc <- sort(colnames(dat)[-1])
       traits <- sort(colnames(dat))
       weightages <- rep(0, ncol(dat))
@@ -180,7 +186,14 @@ mod_data_import_server <- function(id){
       # list_of_inputs <<- reactiveValuesToList(input)
       # print(list_of_inputs)
       gen_data <- userFile()$datapath
-      dat <- generate_sindex_table(gen_data)
+      ext <- tools::file_ext(gen_data)
+      if(ext == "xls" || ext == "xlsx"){
+        dat <- generate_sindex_table_from_excel(gen_data)
+      } else if(ext == "csv") {
+        gen_data <- read.csv(userFile()$datapath)
+        dat <- generate_sindex_table_from_csv(gen_data)
+      }
+      # dat <- generate_sindex_table(gen_data)
       traits <- input$traits
       weights <- rep(0, ncol(dat))
       names(weights) <- names(dat)
@@ -203,13 +216,19 @@ mod_data_import_server <- function(id){
     output$select_checks <- renderUI({
       req(userFile())
       gen_data <- userFile()$datapath
-      get_gxe_data <- get_genotype_by_location_data(gen_data)
+      ext <- tools::file_ext(userFile()$datapath)
+      if(ext == "xls" || ext == "xlsx"){
+        dat <- generate_sindex_table_from_excel(gen_data)
+      } else if(ext == "csv") {
+        dat <- read.csv(userFile()$datapath)
+        dat <- generate_sindex_table_from_csv(dat)
+      }
       pickerInput(
         inputId = ns("select_checks"),
         label = "Select checks",
-        choices = c(unique(get_gxe_data$accession)),
+        choices = c(unique(dat$accession)),
         multiple = TRUE,
-        selected = get_checks(unique(get_gxe_data$accession)),
+        selected = get_checks(unique(dat$accession)),
         options = pickerOptions(
           liveSearch = TRUE,
           style = "btn-primary",
@@ -223,13 +242,20 @@ mod_data_import_server <- function(id){
       # req(check_sindex())
       print(check_sindex())
       gen_data <- userFile()$datapath
-      get_gxe_data <- get_genotype_by_location_data(gen_data)
+      ext <- tools::file_ext(userFile()$datapath)
+      if(ext == "xls" || ext == "xlsx"){
+        get_gxe_data <- get_genotype_by_location_data(gen_data)
+      } else if(ext == "csv") {
+        gen_data <- read.csv(userFile()$datapath)
+        get_gxe_data <- wrangle_data(gen_data) %>% wrangle_colnames()
+      }
+      # get_gxe_data <- get_genotype_by_location_data(gen_data)
       # print(get_gxe_data)
       # sindex <- tryCatch(
       #   expr = {
       if(check_sindex() == "notavailable"){
         req(input$sindex_choice)
-        print(input$sindex_choice)
+        # print(input$sindex_choice)
         if(input$sindex_choice == TRUE){
           req(calculate_si())
           get_sindex_data <- calculate_si()
@@ -237,12 +263,6 @@ mod_data_import_server <- function(id){
       }else{
         get_sindex_data <- export_si_from_blups(datapath = gen_data)
       }
-      #   },
-      #   error = function(e){
-      #     print(e)
-      #   }
-      # )
-      # # print(sindex)
       dataframes_list <- list(env_data = get_gxe_data, sin_data = get_sindex_data, checks = input$select_checks)
         # print(dataframes_list)
       return(dataframes_list)
