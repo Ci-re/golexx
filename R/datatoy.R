@@ -116,8 +116,10 @@ wrangle_data <- function(imported_data){
   x <- colnames(imported_data)
   acc_ind <- which(str_detect(x,paste(c("ssion", "genotype", "gen", "acc", "landrace", "germpl", "clon", "clone"), collapse = '|')))
   colnames(imported_data)[acc_ind] <- "accession"
-  comb_ind <- which(str_detect(x,paste(c("com", "combine", "avg", "average", "loc"), collapse = '|')))
+  comb_ind <- which(str_detect(x,paste(c("com", "combine", "avg", "average"), collapse = '|')))
   colnames(imported_data)[comb_ind] <- "combined"
+  location <- which(str_detect(x,paste(c("loc", "location", "env", "environ","environment"), collapse = '|')))
+  colnames(imported_data)[location] <- "location"
   trait_ind <- which(str_detect(x,paste(c("trait", "trts", "traits"), collapse = '|')))
   colnames(imported_data)[trait_ind] <- "trait"
   return(imported_data)
@@ -180,27 +182,30 @@ wrangle_colnames <- function(data){
 attach_location_coordinates <- function(dataframe){
   dat <- dataframe
   piv <- dat %>% pivot_longer(cols = -c(trait, accession, combined), names_to = "location", values_to = "values")
-  locs <- data.frame(location = c("ibadan", "mokwa", "ago_owu", "onne", "otobi", "ubiaja"), lat = c(7.3775, 9.2928, 7.2519, 4.7238, 7.1079, 6.6493),
-                     long = c(3.9470,5.0547,4.3258,7.1516,8.0897,6.3918))
+  locs <- data.frame(location = c("ibadan", "mokwa", "ago_owu", "onne", "otobi", "ubiaja", "ikenne"),
+                     lat = c(7.3775, 9.2928, 7.2519, 4.7238, 7.1079, 6.6493, 6.8650),
+                     long = c(3.9470, 5.0547, 4.3258, 7.1516, 8.0897, 6.3918, 3.7143))
   piv2 <- piv %>%
     mutate(
       long = case_when(
-        location == "ago_owu"      ~ locs %>% filter(location=="ago_owu") %>% dplyr::select(long) %>% as.numeric(),
-        location == "ibadan"      ~ locs %>% filter(location=="ibadan") %>% dplyr::select(long) %>% as.numeric(),
-        location == "mokwa"      ~ locs %>% filter(location=="mokwa") %>% dplyr::select(long) %>% as.numeric(),
-        location == "onne"      ~ locs %>% filter(location=="onne") %>% dplyr::select(long) %>% as.numeric(),
-        location == "otobi"      ~ locs %>% filter(location=="otobi") %>% dplyr::select(long) %>% as.numeric(),
-        location == "ubiaja"      ~ locs %>% filter(location=="ubiaja") %>% dplyr::select(long) %>% as.numeric()
+        str_detect(location, paste(c("ag", "ago"), collapse = '|')) ~ locs %>% filter(location=="ago_owu") %>% dplyr::select(long) %>% as.numeric(),
+        str_detect(location, paste(c("ib", "iba"), collapse = '|')) ~ locs %>% filter(location=="ibadan") %>% dplyr::select(long) %>% as.numeric(),
+        str_detect(location, paste(c("mk", "mok"), collapse = '|')) ~ locs %>% filter(location=="mokwa") %>% dplyr::select(long) %>% as.numeric(),
+        str_detect(location, paste(c("on", "onn"), collapse = '|')) ~ locs %>% filter(location=="onne") %>% dplyr::select(long) %>% as.numeric(),
+        str_detect(location, paste(c("ot", "oto"), collapse = '|')) ~ locs %>% filter(location=="otobi") %>% dplyr::select(long) %>% as.numeric(),
+        str_detect(location, paste(c("ub", "ubi"), collapse = '|')) ~ locs %>% filter(location=="ubiaja") %>% dplyr::select(long) %>% as.numeric(),
+        str_detect(location, paste(c("ik", "ike"), collapse = '|')) ~ locs %>% filter(location=="ikenne") %>% dplyr::select(long) %>% as.numeric()
       )
     ) %>%
     mutate(
       lat = case_when(
-        location == "ago_owu"      ~ locs %>% filter(location=="ago_owu") %>% dplyr::select(lat) %>% as.numeric(),
-        location == "ibadan"      ~ locs %>% filter(location=="ibadan") %>% dplyr::select(lat) %>% as.numeric(),
-        location == "mokwa"      ~ locs %>% filter(location=="mokwa") %>% dplyr::select(lat) %>% as.numeric(),
-        location == "onne"      ~ locs %>% filter(location=="onne") %>% dplyr::select(lat) %>% as.numeric(),
-        location == "otobi"      ~ locs %>% filter(location=="otobi") %>% dplyr::select(lat) %>% as.numeric(),
-        location == "ubiaja"      ~ locs %>% filter(location=="ubiaja") %>% dplyr::select(lat) %>% as.numeric()
+        str_detect(location, paste(c("ag", "ago"), collapse = '|')) ~ locs %>% filter(location=="ago_owu") %>% dplyr::select(lat) %>% as.numeric(),
+        str_detect(location, paste(c("ib", "iba"), collapse = '|')) ~ locs %>% filter(location=="ibadan") %>% dplyr::select(lat) %>% as.numeric(),
+        str_detect(location, paste(c("mk", "mok"), collapse = '|')) ~ locs %>% filter(location=="mokwa") %>% dplyr::select(lat) %>% as.numeric(),
+        str_detect(location, paste(c("on", "onn"), collapse = '|')) ~ locs %>% filter(location=="onne") %>% dplyr::select(lat) %>% as.numeric(),
+        str_detect(location, paste(c("ot", "oto"), collapse = '|')) ~ locs %>% filter(location=="otobi") %>% dplyr::select(lat) %>% as.numeric(),
+        str_detect(location, paste(c("ub", "ubi"), collapse = '|')) ~ locs %>% filter(location=="ubiaja") %>% dplyr::select(lat) %>% as.numeric(),
+        str_detect(location, paste(c("ik", "ike"), collapse = '|')) ~ locs %>% filter(location=="ikenne") %>% dplyr::select(lat) %>% as.numeric()
       )
     )
   return(piv2)
@@ -223,7 +228,7 @@ get_genotype_by_location_data <- function(datapath, ...){
   # class(mysheetlist)
   mysheetlist <- lapply(mysheetlist, tolower)
   mysheetlist <- as.character(mysheetlist)
-  list_of_traits <- c("dm", "dyld", "fyld", "pltht", "mcmds", "mcmdi", "sprout", "hi", "rtno", "rtwt", "shtwt")
+  list_of_traits <- c("dm", "dyld", "fyld", "pltht", "mcmds", "sprout", "hi", "rtno", "rtwt", "shtwt")
 
   for (i in 1:length(mysheetlist)){
     if(mysheetlist[i]  %in% list_of_traits){
@@ -250,6 +255,7 @@ get_genotype_by_location_data <- function(datapath, ...){
 
 #' calculate_selection_index
 #' @param dataframe The dataframe without the selection index
+#' @param ... Enter traits and their values, check example below
 #'
 #' @return a dataframe with the calculated dataframe
 #' @export
@@ -299,4 +305,45 @@ calculate_selection_index <- function(dataframe, ...){
     final_data <- final_data %>% rename(sindex = value) %>% arrange(-sindex) %>% wrangle_data_sindex()
     return(final_data)
   }
+}
+
+return_sindex_dataframe <- function(datapath, file_name, ext){
+  if(ext == "xls" || ext == "xlsx"){
+    gen_data <- datapath
+    if(stringr::str_detect(string = tolower(file_name), pattern = "ncrp")){
+      dat <- readxl::read_excel(gen_data)
+      dat <- ncrp_wrangler(dat) %>% generate_sindex_table_from_csv()
+    } else {
+      dat <- generate_sindex_table_from_excel(gen_data)
+    }
+  } else if(ext == "csv") {
+    gen_data <- read.csv(datapath)
+    if(stringr::str_detect(string = tolower(file_name), pattern = "ncrp")){
+      dat <- ncrp_wrangler(gen_data) %>% generate_sindex_table_from_csv()
+    } else {
+      dat <- generate_sindex_table_from_csv(gen_data)
+    }
+  }
+  return(dat)
+}
+
+get_gxe_data <- function(datapath, ext, file_name){
+  gen_data <- datapath
+  if(ext == "xls" || ext == "xlsx"){
+    if(stringr::str_detect(string = tolower(file_name), pattern = "ncrp")){
+      dat <- readxl::read_excel(gen_data)
+      get_gxe_data <- ncrp_wrangler(dat)
+    } else {
+      get_gxe_data <- get_genotype_by_location_data(gen_data)
+    }
+  } else if(ext == "csv") {
+    gen_data <- read.csv(datapath)
+    if(stringr::str_detect(string = tolower(file_name), pattern = "ncrp")){
+      dat <- readxl::read_excel(gen_data)
+      get_gxe_data <- ncrp_wrangler(dat)
+    } else {
+      get_gxe_data <- wrangle_data(gen_data) %>% wrangle_colnames()
+    }
+  }
+  return(get_gxe_data)
 }

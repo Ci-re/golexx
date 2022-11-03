@@ -10,7 +10,7 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic
     bs4DashPage(
-      title = "",
+      title = "Golexx",
       skin = NULL,
       freshTheme = NULL,
       preloader = NULL,
@@ -21,33 +21,32 @@ app_ui <- function(request) {
       scrollToTop = FALSE,
       header = bs4DashNavbar(
         title = dashboardBrand(
-          title = "Vix",
+          title = "Golexx",
           color = "white",
-          href = "https://mrpackages.netlify.app/",
-          image = "www/beans3.png",
-          opacity = 0.8
+          href = "",
+          image = "www/nextgen_logo.jpg",
+          opacity = 1
         ),
         status = "light",
         fixed = TRUE,
-        # HTML("<script type='text/javascript' src='https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js' data-name='bmc-button' data-slug='mrbean' data-color='#FFFFFF' data-emoji=''  data-font='Cookie' data-text='Buy MrBean a coffee' data-outline-color='#000' data-font-color='#000' data-coffee-color='#fd0' ></script>"),
-        "Web Application for Data Analysis!",
-        rightUi = bs4DropdownMenu(
-          type = "messages",
-          badgeStatus = "danger",
-          href = "http://buymeacoffee.com/mrbean",
-          messageItem(
-            from = "MrBean",
-            message = "If you want to contribute...",
-            time = "today", image = "www/beans3.png",
-            href = "http://buymeacoffee.com/mrbean"
-          )
-        )
+        "Web Application for MET Result Visualization"
+        # rightUi = bs4DropdownMenu(
+        #   type = "messages",
+        #   badgeStatus = "danger",
+        #   href = "",
+        #   messageItem(
+        #     from = "Golexx",
+        #     message = "If you want to contribute...",
+        #     time = "today", image = "",
+        #     href = ""
+        #   )
+        # )
       ),
       sidebar = bs4DashSidebar(
         skin = "light",
         status = "info",
         elevation = 4,
-        fixed = FALSE,
+        fixed = TRUE,
         bs4SidebarMenu(
           id = "tabs",
           bs4SidebarHeader("Menu"),
@@ -75,17 +74,17 @@ app_ui <- function(request) {
           bs4SidebarMenuItem(
             "Selection Index",
             tabName = "s_index",
-            icon = shiny::icon("chart-column")
+            icon = shiny::icon("filter")
           ),
           bs4SidebarMenuItem(
             "Genotype by Env",
             tabName = "env",
-            icon = shiny::icon("chart-column")
+            icon = shiny::icon("dna")
           ),
           bs4SidebarMenuItem(
             "Geographical Visuals",
             tabName = "geo",
-            icon = shiny::icon("chart-column")
+            icon = shiny::icon("location-dot")
           )
         )
       ),

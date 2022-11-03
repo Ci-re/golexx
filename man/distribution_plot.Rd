@@ -4,7 +4,7 @@
 \alias{distribution_plot}
 \title{distribution_plot}
 \usage{
-distribution_plot(x, y, data, color, lm)
+distribution_plot(x, y, data, color, lm, text)
 }
 \arguments{
 \item{datapath}{the exact path to your blups data}

@@ -60,6 +60,7 @@ usethis::use_r("geo")
 usethis::use_r("shapedata")
 usethis::use_r("precdata")
 usethis::use_r("tempdata")
+usethis::use_r("tiles")
 
 
 

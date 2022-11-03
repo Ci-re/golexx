@@ -8,6 +8,8 @@ calculate_selection_index(dataframe, ...)
 }
 \arguments{
 \item{dataframe}{The dataframe without the selection index}
+
+\item{...}{Enter traits and their values, check example below}
 }
 \value{
 a dataframe with the calculated dataframe

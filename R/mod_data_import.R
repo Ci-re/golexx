@@ -13,7 +13,11 @@ mod_data_import_ui <- function(id){
     fluidPage(
       fluidRow(
         column(8,
-           box(width = 12,
+           box(
+            title = "Load Analysed Data for Visualization",
+            width = 12,
+            status = "info",
+            maximizable = FALSE,
             fluidRow(
               column(6,
                      fileInput(inputId = ns("import_data"),
@@ -26,7 +30,11 @@ mod_data_import_ui <- function(id){
             )
         )),
         column(4,
-               box(width = 12, textOutput(outputId = ns("user_prompt")),
+               box(
+                 width = 12,
+                 status = "info",
+                 maximizable = TRUE,
+                 textOutput(outputId = ns("user_prompt")),
                    uiOutput(outputId = ns("sindex_select_options")),
                    # uiOutput(outputId = ns("subset_table")),
                    uiOutput(outputId = ns("load_all"))))
@@ -129,18 +137,18 @@ mod_data_import_server <- function(id){
 
     observeEvent(input$sindex_choice, {
       gen_data <- userFile()$datapath
+      file_name <- userFile()$name
       ext <- tools::file_ext(userFile()$datapath)
-      if(ext == "xls" || ext == "xlsx"){
-        dat <- generate_sindex_table_from_excel(gen_data)
-      } else if(ext == "csv") {
-        gen_data <- read.csv(userFile()$datapath)
-        dat <- generate_sindex_table_from_csv(gen_data)
-      }
+      dat <- return_sindex_dataframe(gen_data, file_name, ext)
       trait_acc <- sort(colnames(dat)[-1])
       traits <- sort(colnames(dat))
       weightages <- rep(0, ncol(dat))
       # set names to simplify recover/storing value
       names(weightages) <- names(dat)
+      weightages[["dm"]] = 10
+      weightages[["dyld"]] = 15
+      weightages[["fyld"]] = 15
+      weightages[["mcmds"]] = -10
       if(input$sindex_choice == TRUE){
         showModal(
           modalDialog(
@@ -186,13 +194,9 @@ mod_data_import_server <- function(id){
       # list_of_inputs <<- reactiveValuesToList(input)
       # print(list_of_inputs)
       gen_data <- userFile()$datapath
+      file_name <- userFile()$name
       ext <- tools::file_ext(gen_data)
-      if(ext == "xls" || ext == "xlsx"){
-        dat <- generate_sindex_table_from_excel(gen_data)
-      } else if(ext == "csv") {
-        gen_data <- read.csv(userFile()$datapath)
-        dat <- generate_sindex_table_from_csv(gen_data)
-      }
+      dat <- return_sindex_dataframe(datapath = gen_data, file_name, ext)
       # dat <- generate_sindex_table(gen_data)
       traits <- input$traits
       weights <- rep(0, ncol(dat))
@@ -217,12 +221,8 @@ mod_data_import_server <- function(id){
       req(userFile())
       gen_data <- userFile()$datapath
       ext <- tools::file_ext(userFile()$datapath)
-      if(ext == "xls" || ext == "xlsx"){
-        dat <- generate_sindex_table_from_excel(gen_data)
-      } else if(ext == "csv") {
-        dat <- read.csv(userFile()$datapath)
-        dat <- generate_sindex_table_from_csv(dat)
-      }
+      file_name <- userFile()$name
+      dat <- return_sindex_dataframe(gen_data, file_name, ext)
       pickerInput(
         inputId = ns("select_checks"),
         label = "Select checks",
@@ -242,20 +242,11 @@ mod_data_import_server <- function(id){
       # req(check_sindex())
       print(check_sindex())
       gen_data <- userFile()$datapath
+      file_name <- userFile()$name
       ext <- tools::file_ext(userFile()$datapath)
-      if(ext == "xls" || ext == "xlsx"){
-        get_gxe_data <- get_genotype_by_location_data(gen_data)
-      } else if(ext == "csv") {
-        gen_data <- read.csv(userFile()$datapath)
-        get_gxe_data <- wrangle_data(gen_data) %>% wrangle_colnames()
-      }
-      # get_gxe_data <- get_genotype_by_location_data(gen_data)
-      # print(get_gxe_data)
-      # sindex <- tryCatch(
-      #   expr = {
+      get_gxe_data <- get_gxe_data(gen_data, ext, file_name)
       if(check_sindex() == "notavailable"){
         req(input$sindex_choice)
-        # print(input$sindex_choice)
         if(input$sindex_choice == TRUE){
           req(calculate_si())
           get_sindex_data <- calculate_si()

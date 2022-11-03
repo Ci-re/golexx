@@ -31,7 +31,8 @@ mod_env_vix_ui <- function(id){
             width = 12, uiOutput(ns("corr_heat_env")), withSpinner(plotOutput(ns("heatmaps_env"), width = "100%", height = "1200px"))),
         box(status = "info", title = "Barplot Check Difference",
             maximizable = TRUE, elevation = 3,
-            width = 12, uiOutput(ns("top_frac_env")), withSpinner(plotOutput(ns("check_diff_plot_env"), width = "100%", height = "2000px")))
+            width = 12, uiOutput(ns("top_frac_env")), uiOutput(ns("bar_traits")),
+            withSpinner(plotOutput(ns("check_diff_plot_env"), width = "100%")))
       )
     )
   )
@@ -67,7 +68,7 @@ mod_env_vix_server <- function(id, dataset, checks){
         label = "Select trait",
         choices = c(unique(dataset$env_data$trait)),
         multiple = FALSE,
-        selected = get_checks(unique(dataset$env_data$trait)),
+        selected = "FYLD",
         options = pickerOptions(
           liveSearch = TRUE,
           style = "btn-primary",
@@ -138,26 +139,60 @@ mod_env_vix_server <- function(id, dataset, checks){
       dataframe <- dat %>% filter(trait == toupper(input$select_trait)) %>% dplyr::select(-trait) %>%
         dplyr::select(where(not_all_na))
       dataframe <- dataframe %>% arrange(desc(combined))
-
       if(input$corr_heat_env == TRUE){
         heat_plt <- env_heatmap(dataframe)
         return(heat_plt)
       }else{
-        heat_plt <- env_superhheat_corr(dataframe, checks)
+        heat_plt <- env_superheat_corr(dataframe, checks)
         return(heat_plt)
       }
     })
 
-    output$check_diff_plot_env <- renderPlot({
-      req(input$select_trait)
-      dat <- dataset$env_data
-      not_all_na <- function(x) any(!is.na(x))
-      dataframe <- dat %>% filter(trait == toupper(input$select_trait)) %>% dplyr::select(where(not_all_na))
-      dataframe <- dataframe %>% arrange(desc(combined))
-      dat <- calculate_env_checkmean(dataframe, checks = checks)
-      env_barplot_checkdiff <- env_barplot_checkdiff(dat[min(input$top_frac_env):max(input$top_frac_env),])
-      # print(env_barplot_checkdiff)
-      return(env_barplot_checkdiff)
+    output$bar_traits <- renderUI({
+      traits <- unique(dataset$env_data$trait)
+      shinyWidgets::prettyRadioButtons(
+        inputId = ns("bar_traits"),
+        label = "Select traits: ",
+        choices = c(traits),
+        selected = "DM",
+        status = "primary",
+        shape = "square",
+        outline = TRUE,
+        animation = "rotate",
+        fill = TRUE,
+        inline = TRUE
+      )
+    })
+
+    plot_height <- reactiveVal(250)
+
+    plotht <- reactive({
+      req(input$top_frac_env)
+      val <- input$top_frac_env
+      no_obs <- length(min(val):max(val))
+      plotht <- as.numeric(no_obs) * 250
+      plot_height(plotht)
+      return(plot_height())
+    })
+
+    observe({
+      output$check_diff_plot_env <- renderPlot({
+        req(input$bar_traits)
+        dat <- dataset$env_data
+        print(input$bar_traits)
+        trait_to_plot <- input$bar_traits
+
+        not_all_na <- function(x) any(!is.na(x))
+        dataframe <- dat %>%
+          filter(trait == toupper(trait_to_plot)) %>%
+          dplyr::select(where(not_all_na))
+
+        dataframe <- dataframe %>% arrange(desc(combined))
+        dat <- calculate_env_checkmean(dataframe, checks = checks)
+        env_barplot_checkdiff <- env_barplot_checkdiff(dat[min(input$top_frac_env):max(input$top_frac_env),])
+        # print(length(min(input$top_frac_env):max(input$top_frac_env)))
+        return(env_barplot_checkdiff)
+      }, height = plotht())
     })
   })
 }

@@ -7,6 +7,8 @@
 plot_checks(dataframe, traits)
 }
 \arguments{
+\item{traits}{Selected trait to plot}
+
 \item{datapath}{the exact path to your blups data}
 }
 \value{

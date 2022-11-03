@@ -211,19 +211,31 @@ sindex_heatmap <- function(dataframe, color_scale){
 #' @examples
 #' # calculate_sindex_checkmean(dataframe = "sindex.csv", checks_list)
 sup_heat_corr <- function(dataframe, checks){
+  # library(superheat)
+  # library(tidyverse)
+  # x <- read.csv("../dat.csv")
+  # dataframe <- x %>% generate_sindex_table_from_csv() %>% calculate_selection_index(dyld = 12)
+  # checks <- get_checks(dataframe$accession)
+  # unique(dataframe$accession)
+
   u4h <- dataframe %>%
     # arrange(desc(sindex)) %>%
     column_to_rownames("accession")
+
   print_col_checks <- u4h %>%
     mutate(row_number = row_number()) %>%
     .[checks,] #%>%
   #  select(row_number) %>%
   #  as.vector()
 
+  print(u4h)
+  print(print_col_checks)
 
   point.col <- rep("wheat3", nrow(u4h))
+  print(point.col)
   # color checks
-  point.col[print_col_checks[c(1:ncol(print_col_checks)),13]] <- "red"
+  point.col[print_col_checks[c(1:ncol(print_col_checks)),ncol(u4h)+1]] <- "red"
+  print(point.col)
   sup_heat_corr <- superheat(dplyr::select(u4h, -sindex),
                              # scale the variables/columns
                              scale = T,
@@ -337,24 +349,13 @@ sup_heat_corr <- function(dataframe, checks){
 #' @examples
 #' # calculate_sindex_checkmean(dataframe = "sindex.csv", checks_list)
 barplot_checkdiff <- function(import_data){
-  # print(import_data)
+  traits <- c("dyld","fyld","dm","mcmds","pltht","sindex")
   barplot_checkdiff <- import_data %>%
-    # filter(accession == acc_names[i]) %>%
-    dplyr::select(-c(rtwt, mcmds, mcmdi)) %>%
-    dplyr::select(accession,fyld,dyld,dm,shtwt,everything()) %>%
+    dplyr::select(accession,traits) %>%
     pivot_longer(-c(accession,sindex), names_to = "traits", values_to = "values") %>%
-
-    # group_by(traits) %>%
-    # top_frac(.1,sindex) %>%
-    #ungroup() %>%
-
-    # mutate(traits = fct_reorder(traits, values)) %>%
     ggplot(aes(fct_inorder(traits), values)) +
     geom_col(aes(fill = values), stat = "identity", color=alpha("black",.3)) +
-    # facet_grid( vars(fct_inorder(traits)), vars(accession), scales = "free", space = "free") +
-    # geom_hline(aes(yintercept = 0, alpha = 0.1, color="blue")) +
     geom_text(aes(label= round(values,2)), position = position_stack(vjust = 0.5), size = 7) +
-    # geom_text(aes(label=round(values, 2)), vjust=0) +
     scale_fill_gradient2(low = "red", mid = "white", high = "darkgreen", midpoint= 0) +
     scale_y_continuous(limits = c(-100,100), labels = function(x) paste0(x, "%")) +
     facet_wrap(facets = ~reorder(accession, -sindex), ncol = 1, strip.position = "right", scales = "free") +

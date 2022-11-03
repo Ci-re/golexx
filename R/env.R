@@ -218,7 +218,7 @@ env_heatmap <- function(dataframe){
 #' @export
 #' @examples
 #' # calculate_sindex_checkmean(dataframe = "sindex.csv", checks_list)
-env_superhheat_corr <- function(dataframe, checks){
+env_superheat_corr <- function(dataframe, checks){
   u4h <- dataframe %>%
     # arrange(desc(sindex)) %>%
     column_to_rownames("accession")
@@ -228,15 +228,13 @@ env_superhheat_corr <- function(dataframe, checks){
   #  select(row_number) %>%
   #  as.vector()
 
-
   point.col <- rep("wheat3", nrow(u4h))
-  # color checks
-  point.col[print_col_checks[c(1:ncol(print_col_checks)),length(colnames(dataframe))]] <- "red"
+  point.col[print_col_checks[c(1:ncol(print_col_checks)),ncol(u4h)+1]] <- "red"
   sup_heat_corr <- superheat(dplyr::select(u4h, -combined),
                              # scale the variables/columns
                              scale = T,
                              # order the rows by selection index
-                             order.rows = order(dataframe$combined),
+                             order.rows = order(dataframe %>% pull("combined")),
 
                              # # add selection index as a scatterplot next to the rows
                              # yr = u4h$sindex,
@@ -307,8 +305,8 @@ env_superhheat_corr <- function(dataframe, checks){
                              # yr.cluster.col = c("beige", "white", "beige")
 
                              # change the size of the label text
-                             left.label.text.size = 6,
-                             bottom.label.text.size = 6,
+                             left.label.text.size = nrow(dataframe) * (6/nrow(dataframe)),
+                             bottom.label.text.size = ncol(dataframe) * (6/ncol(dataframe)),
 
                              # change the size of the labels
                              left.label.size = 0.3,
@@ -338,19 +336,18 @@ env_superhheat_corr <- function(dataframe, checks){
 
 #' env_barplot_checkdiff
 #'
-#' @param dataframe selection index dataframe to calculate check difference
+#' @param import_data selection index dataframe to calculate check difference
 #' @param checks a list of checks in our dataframe to use as a benchmark for our calculation
-#'
 #' @return a dataframe datatype
-#' @export
 #' @examples
 #' # calculate_sindex_checkmean(dataframe = "sindex.csv", checks_list)
 env_barplot_checkdiff <- function(import_data, checks){
   barplot_checkdiff <- import_data %>%
+    mutate(combined_2 = combined) %>%
     # filter(accession == acc_names[i]) %>%
     dplyr::select(-trait) %>%
     dplyr::select(accession,everything()) %>%
-    pivot_longer(-c(accession, combined), names_to = "traits", values_to = "values")
+    pivot_longer(-c(accession, combined_2), names_to = "traits", values_to = "values")
 
   trait_to_plot <- import_data$trait[1]
   # if(trait_to_plot == "MCMDS"){
@@ -375,14 +372,18 @@ env_barplot_checkdiff <- function(import_data, checks){
     scale_fill_gradient2(low = "red", mid = "white", high = "darkgreen", midpoint= 0) +
     scale_y_continuous(limits = c(-100,100), labels = function(x) paste0(x, "%"))
   if(trait_to_plot == "MCMDS"){
-    plt <- plt + facet_wrap(facets = ~reorder(accession, -combined), ncol = 1, strip.position = "right", scales = "free") +
+    plt <- plt + facet_wrap(facets = ~reorder(accession, combined_2), ncol = 1, strip.position = "right", scales = "free") +
       labs(x = "Location", y = "Percentage Difference", title = "Difference of Accessions X Checks") +
       theme_bw(base_size = 20)
   } else {
-    plt <- plt + facet_wrap(facets = ~reorder(accession, -combined), ncol = 1, strip.position = "right", scales = "free") +
+    plt <- plt + facet_wrap(facets = ~reorder(accession, -combined_2), ncol = 1, strip.position = "right", scales = "free") +
       labs(x = "Location", y = "Percentage Difference", title = "Difference of Accessions X Checks") +
       theme_bw(base_size = 20)
   }
   return(plt)
 }
 
+
+# library(magrittr)
+# dat <- read.csv("../dat.csv")
+# dat <- dat %>% dplyr::filter(trait == "FYLD")

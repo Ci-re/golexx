@@ -12,56 +12,51 @@ mod_geo_vix_ui <- function(id){
   tagList(
     fluidPage(
       fluidRow(
-
-        box(status = "info", title = "Customize and Visualize",
-            width = 12,
-            maximizable = TRUE,
-            shinyWidgets::dropdown(
-              animate = shinyWidgets::animateOptions(
-                enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
-                exit = shinyWidgets::animations$fading_exits$fadeOutLeftBig
-              ),
-              style = "pill",
-              icon = icon("gear"),
-              verify_fa = FALSE,
-              status = "success",
-              width = "300px",
-              uiOutput(ns("select_trait")),
-              uiOutput(ns("select_accession")),
-              uiOutput(ns("select_checks")),
-              uiOutput(ns("weather"))
-            )
+        box(
+          status = "info",
+          title = "Customize and Visualize",
+          width = 12,
+          maximizable = TRUE,
+          fluidRow(
+            column(3, uiOutput(ns("select_trait"))),
+            column(3, uiOutput(ns("select_accession"))),
+            column(3, uiOutput(ns("select_checks"))),
+            column(3, uiOutput(ns("weather")))
+          )
         )
-      ), fluidRow(
-        box(status = "info", title = "Actual Performance accross environments, 'Toggle Check Difference'",
-            uiOutput(ns("check_difference_toggler")),
-            width = 12, withSpinner(plotlyOutput(ns("accession_map"), width = "100%", height = "800px"))),
-        # box(width = 3, ),
-        # box(width = 12, plotlyOutput(ns("check_map"))),
-        box(status = "info", title = "Leaflet Animated Visualization, 'Click on Markers for more info'",
-            width = 12,
-            maximizable = TRUE,
-            shinyWidgets::dropdown(
-              animate = shinyWidgets::animateOptions(
-                enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
-                exit = shinyWidgets::animations$fading_exits$fadeOutLeftBig
-              ),
-              style = "pill",
-              icon = icon("gear"),
-              verify_fa = FALSE,
-              status = "success",
-              width = "300px",
-              radioButtons(inputId = ns("weather2"), label = "Real time view:",
-                           c("Rain" = "rainClassic",
-                             "Temperature" = "temperature",
-                             "Precipitation" = "precipitationClassic",
-                             "Clouds" = "cloudsClassic",
-                             "Pressure" = "pressure",
-                             "Wind" = "wind"),
-                           selected = "precipitationClassic")
-        ),
-        withSpinner(leafletOutput(outputId = ns("live_map"), width = "100%", "900px")))
       )
+    ),
+    fluidRow(
+      box(status = "info", title = "Actual Performance accross environments, 'Toggle Check Difference'",
+          uiOutput(ns("check_difference_toggler")),
+          maximizable = TRUE,
+          width = 12,
+          withSpinner(plotlyOutput(ns("accession_map"), width = "100%", height = "800px"))),
+
+      box(status = "info",
+          title = "Leaflet Animated Visualization, 'Click on Markers for more info'",
+          width = 12,
+          maximizable = TRUE,
+          shinyWidgets::dropdown(
+            animate = shinyWidgets::animateOptions(
+              enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
+              exit = shinyWidgets::animations$fading_exits$fadeOutLeftBig
+            ),
+            style = "pill",
+            icon = icon("gear"),
+            verify_fa = FALSE,
+            status = "success",
+            width = "300px",
+            radioButtons(inputId = ns("weather2"), label = "Real time view:",
+                         c("Rain" = "rainClassic",
+                           "Temperature" = "temperature",
+                           "Precipitation" = "precipitationClassic",
+                           "Clouds" = "cloudsClassic",
+                           "Pressure" = "pressure",
+                           "Wind" = "wind"),
+                         selected = "precipitationClassic")
+          ),
+          withSpinner(leafletOutput(outputId = ns("live_map"), width = "100%", "900px")))
     )
   )
 }
@@ -72,8 +67,6 @@ mod_geo_vix_ui <- function(id){
 mod_geo_vix_server <- function(id, dataset, checks){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-
-
     output$select_trait <- renderUI({
       pickerInput(
         inputId = ns("select_trait"),
@@ -139,7 +132,6 @@ mod_geo_vix_server <- function(id, dataset, checks){
       req(input$select_check)
       req(input$weather)
       print(dataset$env_data)
-
       genotype <- input$select_accession
       weather_data <- input$weather
       checks <- input$select_check

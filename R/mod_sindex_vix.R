@@ -16,10 +16,11 @@ mod_sindex_vix_ui <- function(id){
             width = 6, withSpinner(DT::dataTableOutput(ns("raw_distribution")))),
         box(status = "info", title = "Check Difference Distribution", maximizable = TRUE, elevation = 3,
             width = 6, withSpinner(DT::dataTableOutput(ns("check_mean_distribution")))),
-        box(status = "info", title = "Traits Correlation with S-INDEX",
-            width = 12, withSpinner(plotlyOutput(ns("correlation"), height = "800px", width = "100%"))),
-        # box(width = 3),
+        box(width = 12, status = "info", title = "Traits Correlation with S-INDEX",
+            maximizable = TRUE, elevation = 3,
+           withSpinner(plotlyOutput(ns("correlation"), height = "800px", width = "100%"))),
         box(status = "info", title = "Heatmap: Genotypes against Traits ",
+            maximizable = TRUE, elevation = 3,
             width = 12,
             prettyCheckbox(
               inputId = ns("corr_heat"),
@@ -29,22 +30,13 @@ mod_sindex_vix_ui <- function(id){
               value = TRUE
             ),
             withSpinner(plotOutput(ns("heatmaps"), width = "100%", height = "1200px"))),
-        box(
-          shinyWidgets::dropdown(
-            animate = shinyWidgets::animateOptions(
-              enter = shinyWidgets::animations$fading_entrances$fadeInLeftBig,
-              exit = shinyWidgets::animations$fading_exits$fadeOutLeftBig
-            ),
-            style = "pill",
-            icon = icon("gear"),
-            verify_fa = FALSE,
-            status = "success",
-            width = "300px",
-            uiOutput(ns("top_frac")),
-          ),
+        bs4Dash::box(
           title = "Check Difference: Genotypes traits against Checks",
-          width = 12, maximizable = TRUE, elevation = 3,
-          withSpinner(plotOutput(ns("check_diff_plot"), width = "100%", height = "2000px"))),
+          maximizable = TRUE, elevation = 3,
+          height = "inherit",
+          width = 12, uiOutput(ns("top_frac")),
+          # uiOutput(ns("bar_traits")),
+          withSpinner(plotOutput(ns("check_diff_plot"), width = "100%"))),
       )
     )
   )
@@ -56,7 +48,6 @@ mod_sindex_vix_ui <- function(id){
 mod_sindex_vix_server <- function(id, dataset, checks){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
-
     output$raw_distribution <- DT::renderDataTable({
       dataframe <- dataset$sin_data %>% janitor::clean_names() %>% select(accession | where(is.numeric))
       DT::datatable(
@@ -103,11 +94,6 @@ mod_sindex_vix_server <- function(id, dataset, checks){
       ggplotly(dat)
     })
 
-
-    output$heatmap_hint <- renderUI({
-
-    })
-
     output$heatmaps <- renderPlot({
       # req(input$corr_heat)
       switch <- input$corr_heat
@@ -131,22 +117,49 @@ mod_sindex_vix_server <- function(id, dataset, checks){
         min = 1,
         step = 1,
         max = max_obs,
-        value = c(1,20)
+        value = c(1,mid_obs)
       )
     })
 
-    output$check_diff_plot <- renderPlot({
+    plot_height <- reactiveVal(250)
+
+    plotht <- reactive({
       req(input$top_frac)
-      # sorting <- input$sort_sindex\
-      req(checks)
-      sindex_dataframe <- dataset$sin_data
-      dat <- sindex_dataframe %>% dplyr::select(accession | where(is.numeric))
-      dataframe <- calculate_sindex_checkmean(dataframe = dat,checks = checks)
-      dataframe <- dataframe %>% arrange(desc(sindex))
-      barplot <- barplot_checkdiff(import_data = dataframe[min(input$top_frac):max(input$top_frac),])
-      return(barplot)
+      val <- input$top_frac
+      no_obs <- length(min(val):max(val))
+      plotht <- as.numeric(no_obs) * 250
+      plot_height(plotht)
+      return(plot_height())
     })
 
+    # output$bar_traits <- renderUI({
+    #   traits <- unique(dataset$sin_data)
+    #   shinyWidgets::prettyRadioButtons(
+    #     inputId = ns("bar_traits"),
+    #     label = "Select traits: ",
+    #     choices = c(traits),
+    #     selected = "DM",
+    #     status = "primary",
+    #     shape = "square",
+    #     outline = TRUE,
+    #     animation = "rotate",
+    #     fill = TRUE,
+    #     inline = TRUE
+    #   )
+    # })
+
+    observe({
+      output$check_diff_plot <- renderPlot({
+        req(input$top_frac)
+        req(checks)
+        sindex_dataframe <- dataset$sin_data
+        dat <- sindex_dataframe %>% dplyr::select(accession | where(is.numeric))
+        dataframe <- calculate_sindex_checkmean(dataframe = dat,checks = checks)
+        dataframe <- dataframe %>% arrange(desc(sindex))
+        barplot <- barplot_checkdiff(import_data = dataframe[min(input$top_frac):max(input$top_frac),])
+        return(barplot)
+      }, height = plotht())
+    })
   })
 }
 

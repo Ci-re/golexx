@@ -7,9 +7,9 @@
 env_barplot_checkdiff(import_data, checks)
 }
 \arguments{
-\item{checks}{a list of checks in our dataframe to use as a benchmark for our calculation}
+\item{import_data}{selection index dataframe to calculate check difference}
 
-\item{dataframe}{selection index dataframe to calculate check difference}
+\item{checks}{a list of checks in our dataframe to use as a benchmark for our calculation}
 }
 \value{
 a dataframe datatype

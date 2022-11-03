@@ -29,7 +29,7 @@ mod_summary_stat_ui <- function(id){
             uiOutput(ns("accession_range")),
             # uiOutput(ns("checks_select")),
             radioButtons(inputId = ns("plot_option"), label = "Select plot",
-                         choices = c("Radar", "Line"), selected = "Radar", inline = TRUE)
+                         choices = c("Radar", "Line"), selected = "Line", inline = TRUE)
           ),
         width = 12,
         status = "info",
@@ -61,8 +61,7 @@ mod_summary_stat_ui <- function(id){
             uiOutput(ns("select_y")),
             uiOutput(ns("color_xy")),
             radioButtons(inputId = ns("linmod"), label = "Show lm",
-                         choices = c("Yes", "No"), selected = "No", inline = TRUE),
-            actionButton(inputId = ns("load_plot1"),label = "Load")
+                         choices = c("Yes", "No"), selected = "No", inline = TRUE)
           ),
           plotlyOutput(ns("distribution_plot"))
         ),
@@ -129,7 +128,7 @@ mod_summary_stat_server <- function(id, dataset){
         label = "Select color var",
         choices = c(unique(env$trait)),
         multiple = FALSE,
-        selected = "",
+        selected = "FYLD",
         options = pickerOptions(
           liveSearch = TRUE,
           style = "btn-primary",
@@ -161,7 +160,7 @@ mod_summary_stat_server <- function(id, dataset){
 
       # primary, secondary, info, success, warning, danger, gray-dark, gray, white, indigo, lightblue, navy, purple, fuchsia, pink, maroon, orange, lime, teal, olive
       full_names <- list("MCMDS" = "Cassava Mosaic", "HI" = "Harvest Index", "DM" = "Dry matter",
-                         "SPROUT" = "Sprout", "PLTHT" = "Plant Height",
+                         "SPROUT" = "Sprout", "PLTHT" = "Plant Height", "RTNO" = "Root Number",
                          "DYLD" = "Dry yield", "FYLD" = "Fresh yield")
       box_color <- c("teal", "gray-dark", "info")
       icons <- c("chart-column", "chart-pie", "chart-line")
@@ -196,7 +195,6 @@ mod_summary_stat_server <- function(id, dataset){
 
     output$get_genotype_plot <- renderUI({
       if(!is.null(input$accession_range)){
-        print(input$accession_range)
         accession_range <- input$accession_range
       } else {
         accession_range <- c(1,4)
@@ -219,9 +217,21 @@ mod_summary_stat_server <- function(id, dataset){
             plotOutput(outputId = k, height = "0px"),
             output[[k]] <- renderPlot({
               if(plot_choice == "Radar"){
-                plotRadar(trait_to_plot = selected_traits[k], imported_data = env_dataset, checks = checks, accession_range = accession_range)
+                plotRadar(
+                  trait_to_plot = selected_traits[k],
+                  imported_data = env_dataset,
+                  checks = checks,
+                  accession_range = accession_range
+                )
+              } else if(plot_choice == "Line"){
+                linePlot(
+                  trait_to_plot = selected_traits[k],
+                  imported_data = env_dataset,
+                  checks = checks,
+                  accession_range = accession_range
+                )
               } else {
-                linePlot(trait_to_plot = selected_traits[k], imported_data = env_dataset, checks = checks, accession_range = accession_range)
+                return(NULL)
               }
             })
           )
@@ -236,7 +246,7 @@ mod_summary_stat_server <- function(id, dataset){
         label = "Select x",
         choices = c(colnames(sin_data)),
         multiple = FALSE,
-        selected = "",
+        selected = "dyld",
         options = pickerOptions(
           liveSearch = TRUE,
           style = "btn-primary",
@@ -253,7 +263,7 @@ mod_summary_stat_server <- function(id, dataset){
         label = "Select y",
         choices = c(colnames(sin_data)),
         multiple = FALSE,
-        selected = "",
+        selected = "fyld",
         options = pickerOptions(
           liveSearch = TRUE,
           style = "btn-primary",
@@ -270,7 +280,7 @@ mod_summary_stat_server <- function(id, dataset){
         label = "Select color var",
         choices = c(colnames(sin_data)),
         multiple = FALSE,
-        selected = "",
+        selected = "sindex",
         options = pickerOptions(
           liveSearch = TRUE,
           style = "btn-primary",
@@ -280,22 +290,29 @@ mod_summary_stat_server <- function(id, dataset){
       )
     })
 
-    observeEvent(input$load_plot1, {
+    output$distribution_plot <- renderPlotly({
       x_var <- input$select_x
       y_var <- input$select_y
       col_var <- input$color_xy
       lm <- input$linmod
-      output$distribution_plot <- renderPlotly({
-        sin_data <- dataset$sin_data
-        checks <- get_checks(accession_list = sin_data$accession)
-        sin_data <- sin_data %>% mutate(category = if_else(accession %in% checks, "check", "genotype"))
-        distribution_plot(x = x_var, y = y_var, data = sin_data, color = col_var, lm = lm)
-      })
+      if(is.null(x_var) || is.null(y_var) || is.null(col_var)){
+        x_var = "fyld"; y_var = "dyld"; col_var = "sindex"; lm = "Yes"
+      } else {
+        x_var = x_var; y_var = y_var; col_var = col_var; lm = lm
+      }
+      sin_data <- dataset$sin_data
+      checks <- get_checks(accession_list = sin_data$accession)
+      sin_data <- sin_data %>% mutate(category = if_else(accession %in% checks, "check", "genotype"))
+      distribution_plot(x = x_var, y = y_var, data = sin_data, color = col_var, lm = lm, text = "accession")
     })
 
     output$checks_distribution <- renderPlotly({
-      req(input$select_trait)
       trait <- input$select_trait
+      if(is.null(trait)){
+        trait <- "FYLD"
+      } else {
+        trait <- trait
+      }
       checks <- dataset$checks
       dataframe <- dataset$env_data %>% filter(accession  %in% checks)
       plot_checks(dataframe = dataframe, traits = trait)

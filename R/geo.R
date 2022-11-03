@@ -4,9 +4,6 @@ render_maps <- function(dataframe, checks, trait, accessions, weather, switch){
   lev1 <- shapedata
   tmax_mean_nigeria_df <- tempdata
   prec_data <- precdata
-  # print(lev1)
-  # print(prec_data)
-  # print(tmax_mean_nigeria_df)
 
   weather_rasterFile <- NULL
   colour <- c()
@@ -71,7 +68,7 @@ render_maps <- function(dataframe, checks, trait, accessions, weather, switch){
     tf_val <- tf +
       # coord_sf() +
       geom_text(data = dataframe_values, aes(x = long, y = lat, label = location), nudge_x = .2, nudge_y = .3, check_overlap = FALSE) +
-      geom_point(data = dataframe_values, mapping = aes(x = long, y = lat, color = values, size = values, shape = category,
+      geom_jitter(data = dataframe_values, mapping = aes(x = long, y = lat, color = values, size = values, shape = category,
                                                         text = paste0("<b> Trait: ",traits,"</b> \n",
                                                                       "<b> Accession: ", accession, "</b> \n",
                                                                       "<b>",trait_sel ,":",values,"</b>")), fill = "blue")+
@@ -94,7 +91,7 @@ render_maps <- function(dataframe, checks, trait, accessions, weather, switch){
   } else {
     tf_val <- tf +
       geom_text(data = dataframe_difference, aes(x = long, y = lat, label = location), nudge_x = .2, nudge_y = .3, check_overlap = FALSE) +
-      geom_point(data = dataframe_difference, mapping = aes(x = long, y = lat, color = values, size = values > 0, shape = category,
+      geom_jitter(data = dataframe_difference, mapping = aes(x = long, y = lat, color = values, size = values > 0, shape = category,
                                                             text = paste0("<b> trait: ",traits,"</b> \n",
                                                                           "<b> accession: ", accession, "</b> \n",
                                                                           "<b>",trait_sel ,":",values,"</b>")))+
