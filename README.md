@@ -9,14 +9,13 @@ This tool can be accessed live on shinyapps.io using the link: https://cirec.shi
 
 You can also install as an ```R``` package on your machine using the code
 
-```#install.packages("devtools")```
-or
-```#install.packages("remotes")```
-if not already installed
+```r
+#install.packages("devtools")
+or 
+#install.packages("remotes")
 
-```library(devtools)```
-or
-```library(remotes)```
-<br>
+library(devtools)
+library(remotes)
 
 install_github("Ci-re/golexx")
+```
