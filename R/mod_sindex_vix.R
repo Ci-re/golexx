@@ -12,10 +12,11 @@ mod_sindex_vix_ui <- function(id){
   tagList(
     fluidPage(
       fluidRow(
-        box(status = "info", title = "Raw Table Distribution", maximizable = TRUE, elevation = 3,
-            width = 6, withSpinner(DT::dataTableOutput(ns("raw_distribution")))),
+        box(status = "info", title = "Raw Table Distribution", maximizable = TRUE,  elevation = 3,
+                     collapsible = TRUE, collapsed = TRUE, width = 12,
+                     withSpinner(DT::dataTableOutput(ns("raw_distribution")))),
         box(status = "info", title = "Check Difference Distribution", maximizable = TRUE, elevation = 3,
-            width = 6, withSpinner(DT::dataTableOutput(ns("check_mean_distribution")))),
+            width = 12, withSpinner(DT::dataTableOutput(ns("check_mean_distribution")))),
         box(width = 12, status = "info", title = "Traits Correlation with S-INDEX",
             maximizable = TRUE, elevation = 3,
            withSpinner(plotlyOutput(ns("correlation"), height = "800px", width = "100%"))),

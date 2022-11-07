@@ -12,13 +12,16 @@ mod_env_vix_ui <- function(id){
   tagList(
     fluidPage(
       fluidRow(
-        box(status = "info", title = "Raw Table Distribution",
-            maximizable = TRUE, elevation = 3,
-            width = 6, withSpinner(DT::dataTableOutput(ns("raw_distribution_env")))),
+        box(
+          status = "info",
+          title = "Raw Table Distribution",
+          maximizable = TRUE, elevation = 3,
+          width = 12, collapsible = TRUE, collapsed = TRUE,
+          withSpinner(DT::dataTableOutput(ns("raw_distribution_env")))),
         box(
           status = "info",
           title = "Check Difference Table",
-          width = 6,
+          width = 12,
           uiOutput(ns("select_trait")),
           maximizable = TRUE, elevation = 3,
           withSpinner(DT::dataTableOutput(ns("check_mean_distribution_env")))

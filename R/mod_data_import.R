@@ -244,7 +244,7 @@ mod_data_import_server <- function(id){
       gen_data <- userFile()$datapath
       file_name <- userFile()$name
       ext <- tools::file_ext(userFile()$datapath)
-      get_gxe_data <- get_gxe_data(gen_data, ext, file_name)
+      get_gxe_data <- get_gxe_data(gen_data, ext)
       if(check_sindex() == "notavailable"){
         req(input$sindex_choice)
         if(input$sindex_choice == TRUE){

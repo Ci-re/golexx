@@ -45,7 +45,6 @@ attachment::att_amend_desc()
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module(name = "data_import", with_test = TRUE) # Name of the module
-# golem::add_module(name = "datatoy", with_test = TRUE) # Name of the module
 golem::add_module(name = "summary_stat", with_test = TRUE) # Name of the module
 golem::add_module(name = "sindex_vix", with_test = TRUE) # Name of the module
 golem::add_module(name = "env_vix", with_test = TRUE) # Name of the module

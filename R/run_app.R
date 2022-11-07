@@ -16,6 +16,8 @@
 #' @import tidyr
 #' @import readxl
 #' @import leaflet
+#' @import sf
+#' @import leaflet.providers
 #' @import leaflet.extras
 #' @importFrom leaflet.extras2 addOpenweatherTiles
 #' @import viridis

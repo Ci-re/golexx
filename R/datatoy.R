@@ -310,16 +310,16 @@ calculate_selection_index <- function(dataframe, ...){
 return_sindex_dataframe <- function(datapath, file_name, ext){
   if(ext == "xls" || ext == "xlsx"){
     gen_data <- datapath
-    if(stringr::str_detect(string = tolower(file_name), pattern = "ncrp")){
-      dat <- readxl::read_excel(gen_data)
-      dat <- ncrp_wrangler(dat) %>% generate_sindex_table_from_csv()
+    dat <- readxl::read_excel(gen_data)
+    if("trial" %in% colnames(dat)){
+      dat <- multiyears_wrangler(dat) %>% generate_sindex_table_from_csv()
     } else {
       dat <- generate_sindex_table_from_excel(gen_data)
     }
   } else if(ext == "csv") {
     gen_data <- read.csv(datapath)
-    if(stringr::str_detect(string = tolower(file_name), pattern = "ncrp")){
-      dat <- ncrp_wrangler(gen_data) %>% generate_sindex_table_from_csv()
+    if("trial" %in% colnames(dat)){
+      dat <- multiyears_wrangler(gen_data) %>% generate_sindex_table_from_csv()
     } else {
       dat <- generate_sindex_table_from_csv(gen_data)
     }
@@ -327,20 +327,21 @@ return_sindex_dataframe <- function(datapath, file_name, ext){
   return(dat)
 }
 
-get_gxe_data <- function(datapath, ext, file_name){
-  gen_data <- datapath
+get_gxe_data <- function(datapath, ext){
   if(ext == "xls" || ext == "xlsx"){
-    if(stringr::str_detect(string = tolower(file_name), pattern = "ncrp")){
-      dat <- readxl::read_excel(gen_data)
-      get_gxe_data <- ncrp_wrangler(dat)
+    gen_data <- datapath
+    dat <- readxl::read_excel(gen_data)
+    print(dat)
+    if("trial" %in% colnames(dat)){
+      get_gxe_data <- multiyears_wrangler(dat)
     } else {
       get_gxe_data <- get_genotype_by_location_data(gen_data)
     }
   } else if(ext == "csv") {
     gen_data <- read.csv(datapath)
-    if(stringr::str_detect(string = tolower(file_name), pattern = "ncrp")){
+    if("trial" %in% colnames(dat)){
       dat <- readxl::read_excel(gen_data)
-      get_gxe_data <- ncrp_wrangler(dat)
+      get_gxe_data <- multiyears_wrangler(dat)
     } else {
       get_gxe_data <- wrangle_data(gen_data) %>% wrangle_colnames()
     }

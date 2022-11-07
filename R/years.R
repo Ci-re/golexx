@@ -1,14 +1,15 @@
-#' tidy_ncrp_data
+#' multiyears_tidy_data
 #'
-#' @param dataframe A ncrp data frame in the regular format
+#' @param dataframe A multiyears data frame in the regular format
 #'
-#' @return
-#' @export
+#' @return a tidied dataframe for visualization
 #'
 #' @examples
-ncrp_tidy_data <- function(dataframe){
+#' #multiyears_tidy_data(dataframe)
+multiyears_tidy_data <- function(dataframe){
   # dataframe <- read_xls("../BLUEs_TRIAL.xls")
-  new_data <- dataframe %>% janitor::clean_names() %>% wrangle_data()
+  new_data <- dataframe %>%
+    janitor::clean_names() %>% wrangle_data()
   trial <- length(which(colnames(new_data) == "trial"))
   sn <- which(str_detect(colnames(new_data), "sn"))
   if(sn){
@@ -29,20 +30,21 @@ ncrp_tidy_data <- function(dataframe){
 }
 
 
-#' ncrp_wrangler
+#' multiyears_wrangler
 #'
-#' @param dataframe
+#' @param dataframe a dataframe for wrangling multiyears dataframe
 #'
-#' @return
+#' @return a wrangled dataframe
 #' @export
-#'
 #' @examples
-ncrp_wrangler <- function(dataframe){
+#' multiyears_wrangler(dataframe)
+multiyears_wrangler <- function(dataframe){
   # new_data <- read_xls("../../GolProj/BLUEs_TRIAL.xls") %>%
   new_data <- dataframe %>%
     janitor::clean_names() %>%
-    wrangle_data() %>% ncrp_tidy_data() %>%
-    select(-trial) %>% pivot_longer(cols = -c(accession, location, year), names_to = "trait", values_to = "values")
+    wrangle_data() %>% multiyears_tidy_data() %>%
+    select(-trial) %>%
+    pivot_longer(cols = -c(accession, location, year), names_to = "trait", values_to = "values")
 
   dat <- new_data %>%
     pivot_wider(names_from = "location", values_from = "values", id_cols = c(accession, trait, year)) %>%
