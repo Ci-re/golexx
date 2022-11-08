@@ -55,6 +55,5 @@ multiyears_wrangler <- function(dataframe){
     pivot_wider(id_cols = c(accession, trait), names_from = "location", values_from = "values") %>%
     mutate(combined = rowMeans(select_if(.,is.numeric), na.rm = TRUE)) %>%
     mutate(across(where(is.numeric), round, 2))
-
   return(dat)
 }
